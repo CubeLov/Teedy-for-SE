@@ -134,6 +134,9 @@ mvn -Pprod -DskipTests clean install
 
 You will get your deployable WAR in the `docs-web/target` directory.
 
+### Enable guest log in
+Execute ```UPDATE T_CONFIG SET CFG_VALUE_C = 'true' WHERE CFG_ID_C = 'GUEST_LOGIN'``` in the database
+
 # Contributing
 
 All contributions are more than welcomed. Contributions may close an issue, fix a bug (reported or not reported), improve the existing code, add new feature, and so on.
