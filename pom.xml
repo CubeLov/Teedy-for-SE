@@ -122,6 +122,19 @@
         <artifactId>maven-site-plugin</artifactId>
         <version>3.12.1</version>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.23.0</version>
+        <configuration>
+          <failOnViolation>false</failOnViolation>
+          <rulesets>
+            <ruleset>${project.basedir}/customize-rules.xml</ruleset>
+          </rulesets>
+        </configuration>                        
+      </plugin>
+      
     </plugins>
   </build>
 
@@ -138,6 +151,22 @@
       <url>file:///e:/Teedy-for-SE/target/site-stage</url>
     </site>
   </distributionManagement>
+
+  <reporting>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-pmd-plugin</artifactId>
+              <version>3.23.0</version>
+              <configuration>
+                <rulesets>
+                  <ruleset>${project.basedir}/customize-rules.xml</ruleset>
+                </rulesets>
+              </configuration>  
+          </plugin>
+
+      </plugins>
+  </reporting>
 
   <dependencyManagement>
     <dependencies>
