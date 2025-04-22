@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaginatedLists.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.jpa</a> &gt; <span class="el_source">PaginatedLists.java</span></div><h1>PaginatedLists.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.jpa;
+
+import jakarta.persistence.Query;
+import java.util.List;
+
+/**
+ * Utilities for paginated lists.
+ * 
+ * @author jtremeaux
+ */
+<span class="nc" id="L11">public class PaginatedLists {</span>
+    /**
+     * Default size of a page.
+     */
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    /**
+     * Maximum size of a page.
+     */
+    private static final int MAX_PAGE_SIZE = 100;
+
+    /**
+     * Constructs a paginated list.
+     * 
+     * @param pageSize Size of the page
+     * @param offset Offset of the page
+     * @return Paginated list
+     */
+    public static &lt;E&gt; PaginatedList&lt;E&gt; create(Integer pageSize, Integer offset) {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (pageSize == null) {</span>
+<span class="nc" id="L31">            pageSize = DEFAULT_PAGE_SIZE;</span>
+        }
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (offset == null) {</span>
+<span class="nc" id="L34">            offset = 0;</span>
+        }
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (pageSize &gt; MAX_PAGE_SIZE) {</span>
+<span class="nc" id="L37">            pageSize = MAX_PAGE_SIZE;</span>
+        }
+<span class="nc" id="L39">        return new PaginatedList&lt;&gt;(pageSize, offset);</span>
+    }
+    
+    /**
+     * Constructs a paginated list with default parameters.
+     * 
+     * @return Paginated list
+     */
+    public static &lt;E&gt; PaginatedList&lt;E&gt; create() {
+<span class="nc" id="L48">        return create(null, null);</span>
+    }
+    
+    /**
+     * Executes a native count(*) request to count the number of results.
+     * 
+     * @param paginatedList Paginated list object containing parameters, and into which results are added by side effects
+     * @param queryParam Query parameters
+     */
+    private static &lt;E&gt; void executeCountQuery(PaginatedList&lt;E&gt; paginatedList, QueryParam queryParam) {
+<span class="nc" id="L58">        StringBuilder sb = new StringBuilder(&quot;select count(*) as result_count from (&quot;);</span>
+<span class="nc" id="L59">        sb.append(queryParam.getQueryString());</span>
+<span class="nc" id="L60">        sb.append(&quot;) as t1&quot;);</span>
+
+<span class="nc" id="L62">        QueryParam countQueryParam = new QueryParam(sb.toString(), queryParam.getParameterMap());</span>
+        
+<span class="nc" id="L64">        Query q = QueryUtil.getNativeQuery(countQueryParam);</span>
+        
+<span class="nc" id="L66">        Number resultCount = (Number) q.getSingleResult();</span>
+<span class="nc" id="L67">        paginatedList.setResultCount(resultCount.intValue());</span>
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * Executes a query and returns the data of the current page.
+     * 
+     * @param paginatedList Paginated list object containing parameters, and into which results are added by side effects
+     * @param queryParam Query parameters
+     * @return List of results
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;E&gt; List&lt;Object[]&gt; executeResultQuery(PaginatedList&lt;E&gt; paginatedList, QueryParam queryParam) {
+<span class="nc" id="L79">        Query q = QueryUtil.getNativeQuery(queryParam);</span>
+        
+<span class="nc" id="L81">        q.setFirstResult(paginatedList.getOffset());</span>
+<span class="nc" id="L82">        q.setMaxResults(paginatedList.getLimit());</span>
+<span class="nc" id="L83">        return q.getResultList();</span>
+    }
+
+    /**
+     * Executes a paginated request with 2 native queries (one to count the number of results, and one to return the page).
+     * 
+     * @param paginatedList Paginated list object containing parameters, and into which results are added by side effects
+     * @param queryParam Query parameters
+     * @param sortCriteria Sort criteria
+     * @return List of results
+     */
+    public static &lt;E&gt; List&lt;Object[]&gt; executePaginatedQuery(PaginatedList&lt;E&gt; paginatedList, QueryParam queryParam, SortCriteria sortCriteria) {
+<span class="nc" id="L95">        QueryParam sortedQueryParam = QueryUtil.getSortedQueryParam(queryParam, sortCriteria);</span>
+<span class="nc" id="L96">        executeCountQuery(paginatedList, sortedQueryParam);</span>
+<span class="nc" id="L97">        return executeResultQuery(paginatedList, sortedQueryParam);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

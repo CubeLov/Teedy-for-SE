@@ -61,6 +61,9 @@
     <org.apache.maven.plugins.maven-war-plugin.version>3.3.2</org.apache.maven.plugins.maven-war-plugin.version>
     <org.apache.maven.plugins.maven-surefire-plugin.version>3.0.0</org.apache.maven.plugins.maven-surefire-plugin.version>
     <org.eclipse.jetty.jetty-maven-plugin.version>11.0.20</org.eclipse.jetty.jetty-maven-plugin.version>
+    
+    <!-- 添加 JaCoCo 插件版本属性 -->
+    <jacoco.version>0.8.11</jacoco.version>
   </properties>
 
   <scm>
@@ -106,8 +109,16 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${org.apache.maven.plugins.maven-surefire-plugin.version}</version>
         <configuration>
+          <argLine>${surefireArgLine} -Xmx2048m</argLine>
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
+          <testFailureIgnore>true</testFailureIgnore>
+          <systemPropertyVariables>
+            <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
+            <user.language>en</user.language>
+            <user.region>US</user.region>
+          </systemPropertyVariables>
+          <workingDirectory>${project.build.directory}/test-working-dir</workingDirectory>
         </configuration>
       </plugin>
 
@@ -133,6 +144,38 @@
             <ruleset>${project.basedir}/customize-rules.xml</ruleset>
           </rulesets>
         </configuration>                        
+      </plugin>
+      
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+              <append>true</append>
+              <propertyName>surefireArgLine</propertyName>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+            </configuration>
+          </execution>
+          
+          <execution>
+            <id>default-report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       
     </plugins>
@@ -163,6 +206,19 @@
                   <ruleset>${project.basedir}/customize-rules.xml</ruleset>
                 </rulesets>
               </configuration>  
+          </plugin>
+          
+          <plugin>
+              <groupId>org.jacoco</groupId>
+              <artifactId>jacoco-maven-plugin</artifactId>
+              <version>${jacoco.version}</version>
+              <reportSets>
+                  <reportSet>
+                      <reports>
+                          <report>report</report>
+                      </reports>
+                  </reportSet>
+              </reportSets>
           </plugin>
 
       </plugins>

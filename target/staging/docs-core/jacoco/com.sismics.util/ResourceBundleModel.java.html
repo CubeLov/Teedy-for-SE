@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResourceBundleModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.util</a> &gt; <span class="el_source">ResourceBundleModel.java</span></div><h1>ResourceBundleModel.java</h1><pre class="source lang-java linenums">package com.sismics.util;
+
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.StringModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+/**
+ * Override of {@link freemarker.ext.beans.ResourceBundleModel}
+ * to threat single quotes uniformely.
+ * 
+ * @author bgamard
+ */
+public class ResourceBundleModel extends freemarker.ext.beans.ResourceBundleModel {
+
+    /**
+     * Default constructor.
+     * 
+     * @param bundle Resource bundle
+     * @param wrapper Beans wrapper
+     */
+    public ResourceBundleModel(ResourceBundle bundle, BeansWrapper wrapper) {
+<span class="nc" id="L28">        super(bundle, wrapper);</span>
+<span class="nc" id="L29">    }</span>
+
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    @Override
+    public Object exec(List arguments) throws TemplateModelException {
+        // Must have at least one argument - the key
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (arguments.size() &lt; 1)</span>
+<span class="nc" id="L36">            throw new TemplateModelException(&quot;No message key was specified&quot;);</span>
+        // Read it
+<span class="nc" id="L38">        Iterator it = arguments.iterator();</span>
+<span class="nc" id="L39">        String key = unwrap((TemplateModel) it.next()).toString();</span>
+        try {
+            // Copy remaining arguments into an Object[]
+<span class="nc" id="L42">            int args = arguments.size() - 1;</span>
+<span class="nc" id="L43">            Object[] params = new Object[args];</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            for (int i = 0; i &lt; args; ++i)</span>
+<span class="nc" id="L45">                params[i] = unwrap((TemplateModel) it.next());</span>
+
+            // Invoke format
+<span class="nc" id="L48">            return new StringModel(format(key, params), wrapper);</span>
+<span class="nc" id="L49">        } catch (MissingResourceException e) {</span>
+<span class="nc" id="L50">            throw new TemplateModelException(&quot;No such key: &quot; + key);</span>
+<span class="nc" id="L51">        } catch (Exception e) {</span>
+<span class="nc" id="L52">            throw new TemplateModelException(e.getMessage());</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

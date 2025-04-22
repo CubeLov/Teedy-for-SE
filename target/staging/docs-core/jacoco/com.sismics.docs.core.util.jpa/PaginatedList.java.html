@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaginatedList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.jpa</a> &gt; <span class="el_source">PaginatedList.java</span></div><h1>PaginatedList.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.jpa;
+
+import java.util.List;
+
+/**
+ * Paginated list.
+ *
+ * @author jtremeaux
+ */
+public class PaginatedList&lt;T&gt; {
+    /**
+     * Size of a page.
+     */
+    private int limit;
+
+    /**
+     * Offset of the page (in number of records).
+     */
+    private int offset;
+
+    /**
+     * Total number of records.
+     */
+    private int resultCount;
+    
+    /**
+     * List of records of the current page.
+     */
+    private List&lt;T&gt; resultList;
+    
+    /**
+     * Constructor of PaginatedList.
+     * 
+     * @param pageSize Page size
+     * @param offset Offset
+     */
+<span class="nc" id="L37">    public PaginatedList(int pageSize, int offset) {</span>
+<span class="nc" id="L38">        this.limit = pageSize;</span>
+<span class="nc" id="L39">        this.offset = offset;</span>
+<span class="nc" id="L40">    }</span>
+
+    /**
+     * Getter of resultCount.
+     *
+     * @return resultCount
+     */
+    public int getResultCount() {
+<span class="nc" id="L48">        return resultCount;</span>
+    }
+
+    /**
+     * Setter of resultCount.
+     *
+     * @param resultCount resultCount
+     */
+    public void setResultCount(int resultCount) {
+<span class="nc" id="L57">        this.resultCount = resultCount;</span>
+<span class="nc" id="L58">    }</span>
+
+    /**
+     * Getter of resultList.
+     *
+     * @return resultList
+     */
+    public List&lt;T&gt; getResultList() {
+<span class="nc" id="L66">        return resultList;</span>
+    }
+
+    /**
+     * Setter of resultList.
+     *
+     * @param resultList resultList
+     */
+    public void setResultList(List&lt;T&gt; resultList) {
+<span class="nc" id="L75">        this.resultList = resultList;</span>
+<span class="nc" id="L76">    }</span>
+
+    /**
+     * Getter of limit.
+     *
+     * @return limit
+     */
+    public int getLimit() {
+<span class="nc" id="L84">        return limit;</span>
+    }
+
+    /**
+     * Getter of offset.
+     *
+     * @return offset
+     */
+    public int getOffset() {
+<span class="nc" id="L93">        return offset;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

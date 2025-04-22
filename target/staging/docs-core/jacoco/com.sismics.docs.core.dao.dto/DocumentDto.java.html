@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao.dto</a> &gt; <span class="el_source">DocumentDto.java</span></div><h1>DocumentDto.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao.dto;
+
+/**
+ * Document DTO.
+ *
+ * @author bgamard 
+ */
+<span class="nc" id="L8">public class DocumentDto {</span>
+    /**
+     * Document ID.
+     */
+    private String id;
+
+    /**
+     * Main file ID.
+     */
+    private String fileId;
+
+    /**
+     * Title.
+     */
+    private String title;
+    
+    /**
+     * Description.
+     */
+    private String description;
+    
+    /**
+     * Subject.
+     */
+    private String subject;
+    
+    /**
+     * Identifier.
+     */
+    private String identifier;
+    
+    /**
+     * Publisher.
+     */
+    private String publisher;
+    
+    /**
+     * Format.
+     */
+    private String format;
+    
+    /**
+     * Source.
+     */
+    private String source;
+    
+    /**
+     * Type.
+     */
+    private String type;
+    
+    /**
+     * Coverage.
+     */
+    private String coverage;
+    
+    /**
+     * Rights.
+     */
+    private String rights;
+    
+    /**
+     * Language.
+     */
+    private String language;
+    
+    /**
+     * Creation date.
+     */
+    private Long createTimestamp;
+    
+    /**
+     * Update date.
+     */
+    private Long updateTimestamp;
+
+    /**
+     * Shared status.
+     */
+    private Boolean shared;
+
+    /**
+     * File count.
+     */
+    private Integer fileCount;
+    
+    /**
+     * Document creator.
+     */
+    private String creator;
+
+    /**
+     * A route is active.
+     */
+    private boolean activeRoute;
+
+    /**
+     * Current route step name.
+     */
+    private String currentStepName;
+
+    /**
+     * Search highlight.
+     */
+    private String highlight;
+
+    public String getId() {
+<span class="nc" id="L115">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L119">        this.id = id;</span>
+<span class="nc" id="L120">    }</span>
+
+    public String getFileId() {
+<span class="nc" id="L123">        return fileId;</span>
+    }
+
+    public DocumentDto setFileId(String fileId) {
+<span class="nc" id="L127">        this.fileId = fileId;</span>
+<span class="nc" id="L128">        return this;</span>
+    }
+
+    public String getTitle() {
+<span class="nc" id="L132">        return title;</span>
+    }
+
+    public void setTitle(String title) {
+<span class="nc" id="L136">        this.title = title;</span>
+<span class="nc" id="L137">    }</span>
+
+    public String getDescription() {
+<span class="nc" id="L140">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L144">        this.description = description;</span>
+<span class="nc" id="L145">    }</span>
+
+    public String getSubject() {
+<span class="nc" id="L148">        return subject;</span>
+    }
+
+    public void setSubject(String subject) {
+<span class="nc" id="L152">        this.subject = subject;</span>
+<span class="nc" id="L153">    }</span>
+
+    public String getIdentifier() {
+<span class="nc" id="L156">        return identifier;</span>
+    }
+
+    public void setIdentifier(String identifier) {
+<span class="nc" id="L160">        this.identifier = identifier;</span>
+<span class="nc" id="L161">    }</span>
+    
+    public String getPublisher() {
+<span class="nc" id="L164">        return publisher;</span>
+    }
+
+    public void setPublisher(String publisher) {
+<span class="nc" id="L168">        this.publisher = publisher;</span>
+<span class="nc" id="L169">    }</span>
+
+    public String getFormat() {
+<span class="nc" id="L172">        return format;</span>
+    }
+
+    public void setFormat(String format) {
+<span class="nc" id="L176">        this.format = format;</span>
+<span class="nc" id="L177">    }</span>
+
+    public String getSource() {
+<span class="nc" id="L180">        return source;</span>
+    }
+
+    public void setSource(String source) {
+<span class="nc" id="L184">        this.source = source;</span>
+<span class="nc" id="L185">    }</span>
+
+    public String getType() {
+<span class="nc" id="L188">        return type;</span>
+    }
+
+    public void setType(String type) {
+<span class="nc" id="L192">        this.type = type;</span>
+<span class="nc" id="L193">    }</span>
+
+    public String getCoverage() {
+<span class="nc" id="L196">        return coverage;</span>
+    }
+
+    public void setCoverage(String coverage) {
+<span class="nc" id="L200">        this.coverage = coverage;</span>
+<span class="nc" id="L201">    }</span>
+
+    public String getRights() {
+<span class="nc" id="L204">        return rights;</span>
+    }
+
+    public void setRights(String rights) {
+<span class="nc" id="L208">        this.rights = rights;</span>
+<span class="nc" id="L209">    }</span>
+
+    public Long getCreateTimestamp() {
+<span class="nc" id="L212">        return createTimestamp;</span>
+    }
+
+    public void setCreateTimestamp(Long createTimestamp) {
+<span class="nc" id="L216">        this.createTimestamp = createTimestamp;</span>
+<span class="nc" id="L217">    }</span>
+
+    public Boolean getShared() {
+<span class="nc" id="L220">        return shared;</span>
+    }
+
+    public void setShared(Boolean shared) {
+<span class="nc" id="L224">        this.shared = shared;</span>
+<span class="nc" id="L225">    }</span>
+
+    public String getLanguage() {
+<span class="nc" id="L228">        return language;</span>
+    }
+
+    public void setLanguage(String language) {
+<span class="nc" id="L232">        this.language = language;</span>
+<span class="nc" id="L233">    }</span>
+
+    public Integer getFileCount() {
+<span class="nc" id="L236">        return fileCount;</span>
+    }
+
+    public void setFileCount(Integer fileCount) {
+<span class="nc" id="L240">        this.fileCount = fileCount;</span>
+<span class="nc" id="L241">    }</span>
+
+    public String getCreator() {
+<span class="nc" id="L244">        return creator;</span>
+    }
+
+    public void setCreator(String creator) {
+<span class="nc" id="L248">        this.creator = creator;</span>
+<span class="nc" id="L249">    }</span>
+
+    public boolean isActiveRoute() {
+<span class="nc" id="L252">        return activeRoute;</span>
+    }
+
+    public void setActiveRoute(boolean activeRoute) {
+<span class="nc" id="L256">        this.activeRoute = activeRoute;</span>
+<span class="nc" id="L257">    }</span>
+
+    public String getCurrentStepName() {
+<span class="nc" id="L260">        return currentStepName;</span>
+    }
+
+    public Long getUpdateTimestamp() {
+<span class="nc" id="L264">        return updateTimestamp;</span>
+    }
+
+    public void setUpdateTimestamp(Long updateTimestamp) {
+<span class="nc" id="L268">        this.updateTimestamp = updateTimestamp;</span>
+<span class="nc" id="L269">    }</span>
+
+    public DocumentDto setCurrentStepName(String currentStepName) {
+<span class="nc" id="L272">        this.currentStepName = currentStepName;</span>
+<span class="nc" id="L273">        return this;</span>
+    }
+
+    public String getHighlight() {
+<span class="nc" id="L277">        return highlight;</span>
+    }
+
+    public DocumentDto setHighlight(String highlight) {
+<span class="nc" id="L281">        this.highlight = highlight;</span>
+<span class="nc" id="L282">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

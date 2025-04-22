@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentCreatedAsyncListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.listener.async</a> &gt; <span class="el_source">DocumentCreatedAsyncListener.java</span></div><h1>DocumentCreatedAsyncListener.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.listener.async;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
+import com.sismics.docs.core.dao.ContributorDao;
+import com.sismics.docs.core.dao.DocumentDao;
+import com.sismics.docs.core.event.DocumentCreatedAsyncEvent;
+import com.sismics.docs.core.model.context.AppContext;
+import com.sismics.docs.core.model.jpa.Contributor;
+import com.sismics.docs.core.model.jpa.Document;
+import com.sismics.docs.core.util.TransactionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Listener on document created.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L20">public class DocumentCreatedAsyncListener {</span>
+    /**
+     * Logger.
+     */
+<span class="nc" id="L24">    private static final Logger log = LoggerFactory.getLogger(DocumentCreatedAsyncListener.class);</span>
+
+    /**
+     * Document created.
+     * 
+     * @param event Document created event
+     */
+    @Subscribe
+    @AllowConcurrentEvents
+    public void on(final DocumentCreatedAsyncEvent event) {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (log.isInfoEnabled()) {</span>
+<span class="nc" id="L35">            log.info(&quot;Document created event: &quot; + event.toString());</span>
+        }
+
+<span class="nc" id="L38">        TransactionUtil.handle(() -&gt; {</span>
+            // Fetch a fresh document
+<span class="nc" id="L40">            Document document = new DocumentDao().getById(event.getDocumentId());</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            if (document == null) {</span>
+                // The document has been deleted since
+<span class="nc" id="L43">                return;</span>
+            }
+
+            // Add the first contributor (the creator of the document)
+<span class="nc" id="L47">            ContributorDao contributorDao = new ContributorDao();</span>
+<span class="nc" id="L48">            Contributor contributor = new Contributor();</span>
+<span class="nc" id="L49">            contributor.setDocumentId(event.getDocumentId());</span>
+<span class="nc" id="L50">            contributor.setUserId(event.getUserId());</span>
+<span class="nc" id="L51">            contributorDao.create(contributor);</span>
+
+            // Update index
+<span class="nc" id="L54">            AppContext.getInstance().getIndexingHandler().createDocument(document);</span>
+<span class="nc" id="L55">        });</span>
+<span class="nc" id="L56">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

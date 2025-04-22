@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PdfFormatHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.format</a> &gt; <span class="el_source">PdfFormatHandler.java</span></div><h1>PdfFormatHandler.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.format;
+
+import com.google.common.io.Closer;
+import com.sismics.docs.core.util.FileUtil;
+import com.sismics.docs.core.util.ConfigUtil;
+import com.sismics.docs.core.constant.ConfigType;
+import com.sismics.util.mime.MimeType;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * PDF format handler.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L27">public class PdfFormatHandler implements FormatHandler {</span>
+    /**
+     * Logger.
+     */
+<span class="nc" id="L31">    private static final Logger log = LoggerFactory.getLogger(PdfFormatHandler.class);</span>
+
+    @Override
+    public boolean accept(String mimeType) {
+<span class="nc" id="L35">        return mimeType.equals(MimeType.APPLICATION_PDF);</span>
+    }
+
+    @Override
+    public BufferedImage generateThumbnail(Path file) throws Exception {
+<span class="nc" id="L40">        try (InputStream inputStream = Files.newInputStream(file);</span>
+<span class="nc" id="L41">             PDDocument pdfDocument = PDDocument.load(inputStream)) {</span>
+<span class="nc" id="L42">            PDFRenderer renderer = new PDFRenderer(pdfDocument);</span>
+<span class="nc" id="L43">            return renderer.renderImage(0);</span>
+        }
+    }
+
+    @Override
+    public String extractContent(String language, Path file) {
+<span class="nc" id="L49">        String content = null;</span>
+<span class="nc" id="L50">        try (InputStream inputStream = Files.newInputStream(file);</span>
+<span class="nc" id="L51">             PDDocument pdfDocument = PDDocument.load(inputStream)) {</span>
+<span class="nc" id="L52">            content = new PDFTextStripper().getText(pdfDocument);</span>
+<span class="nc" id="L53">        } catch (Exception e) {</span>
+<span class="nc" id="L54">            log.error(&quot;Error while extracting text from the PDF&quot;, e);</span>
+<span class="nc" id="L55">        }</span>
+
+        // No text content, try to OCR it
+<span class="nc bnc" id="L58" title="All 8 branches missed.">        if (language != null &amp;&amp; content != null &amp;&amp; content.trim().isEmpty() &amp;&amp; ConfigUtil.getConfigBooleanValue(ConfigType.OCR_ENABLED, true)) {</span>
+<span class="nc" id="L59">            StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L60">            try (InputStream inputStream = Files.newInputStream(file);</span>
+<span class="nc" id="L61">                 PDDocument pdfDocument = PDDocument.load(inputStream)) {</span>
+<span class="nc" id="L62">                PDFRenderer renderer = new PDFRenderer(pdfDocument);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                for (int pageIndex = 0; pageIndex &lt; pdfDocument.getNumberOfPages(); pageIndex++) {</span>
+<span class="nc" id="L64">                    log.info(&quot;OCR page &quot; + (pageIndex + 1) + &quot;/&quot; + pdfDocument.getNumberOfPages() + &quot; of PDF file containing only images&quot;);</span>
+<span class="nc" id="L65">                    sb.append(&quot; &quot;);</span>
+<span class="nc" id="L66">                    sb.append(FileUtil.ocrFile(language, renderer.renderImageWithDPI(pageIndex, 300, ImageType.GRAY)));</span>
+                }
+<span class="nc" id="L68">                return sb.toString();</span>
+<span class="nc" id="L69">            } catch (Exception e) {</span>
+<span class="nc" id="L70">                log.error(&quot;Error while OCR-izing the PDF&quot;, e);</span>
+            }
+        }
+
+<span class="nc" id="L74">        return content;</span>
+    }
+
+    @Override
+    public void appendToPdf(Path file, PDDocument doc, boolean fitImageToPage, int margin, MemoryUsageSetting memUsageSettings, Closer closer) throws Exception {
+<span class="nc" id="L79">        PDDocument mergeDoc = PDDocument.load(file.toFile(), memUsageSettings);</span>
+<span class="nc" id="L80">        closer.register(mergeDoc);</span>
+<span class="nc" id="L81">        PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();</span>
+<span class="nc" id="L82">        pdfMergerUtility.appendDocument(doc, mergeDoc);</span>
+<span class="nc" id="L83">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

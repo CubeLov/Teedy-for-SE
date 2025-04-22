@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TagAction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.action</a> &gt; <span class="el_source">TagAction.java</span></div><h1>TagAction.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.action;
+
+import com.sismics.docs.core.dao.TagDao;
+import com.sismics.docs.core.dao.criteria.TagCriteria;
+import com.sismics.docs.core.dao.dto.TagDto;
+
+import jakarta.json.JsonObject;
+import java.util.List;
+
+/**
+ * Abstract class for tag actions.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L15">public abstract class TagAction implements Action {</span>
+    @Override
+    public void validate(JsonObject action) throws Exception {
+<span class="nc" id="L18">        TagDao tagDao = new TagDao();</span>
+<span class="nc" id="L19">        String tagId = action.getString(&quot;tag&quot;);</span>
+<span class="nc bnc" id="L20" title="All 2 branches missed.">        if (tagId == null) {</span>
+<span class="nc" id="L21">            throw new Exception(&quot;step.transitions.actions.tag is required&quot;);</span>
+        }
+<span class="nc" id="L23">        List&lt;TagDto&gt; tagDtoList = tagDao.findByCriteria(new TagCriteria().setId(tagId), null);</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (tagDtoList.size() != 1) {</span>
+<span class="nc" id="L25">            throw new Exception(tagId + &quot; is not a valid tag&quot;);</span>
+        }
+<span class="nc" id="L27">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

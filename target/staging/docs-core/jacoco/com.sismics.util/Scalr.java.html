@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Scalr.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.util</a> &gt; <span class="el_source">Scalr.java</span></div><h1>Scalr.java</h1><pre class="source lang-java linenums">package com.sismics.util;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ImagingOpException;
+
+/**
+ * Extends Scalr.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L14">public class Scalr extends org.imgscalr.Scalr {</span>
+    /**
+     * Rotate an image by a specific amount.
+     *
+     * @param src Source image
+     * @param rotation Rotation angle
+     * @param ops Options
+     * @return Rotated image
+     * @throws IllegalArgumentException
+     * @throws ImagingOpException
+     */
+    public static BufferedImage rotate(BufferedImage src, double rotation, BufferedImageOp... ops) throws IllegalArgumentException, ImagingOpException {
+<span class="nc" id="L26">        long t = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (src == null) {</span>
+<span class="nc" id="L28">            throw new IllegalArgumentException(&quot;src cannot be null&quot;);</span>
+        } else {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">            if (DEBUG) {</span>
+<span class="nc" id="L31">                log(0, &quot;Rotating Image [%s]...&quot;, rotation);</span>
+            }
+
+<span class="nc" id="L34">            AffineTransform tx = new AffineTransform();</span>
+<span class="nc" id="L35">            tx.rotate(Math.toRadians(rotation));</span>
+
+<span class="nc" id="L37">            BufferedImage result = createOptimalImage(src, src.getWidth(), src.getHeight());</span>
+<span class="nc" id="L38">            Graphics2D g2d = result.createGraphics();</span>
+<span class="nc" id="L39">            g2d.drawImage(src, tx, null);</span>
+<span class="nc" id="L40">            g2d.dispose();</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            if (DEBUG) {</span>
+<span class="nc" id="L42">                log(0, &quot;Rotation Applied in %d ms, result [width=%d, height=%d]&quot;, System.currentTimeMillis() - t, result.getWidth(), result.getHeight());</span>
+            }
+
+<span class="nc bnc" id="L45" title="All 4 branches missed.">            if (ops != null &amp;&amp; ops.length &gt; 0) {</span>
+<span class="nc" id="L46">                result = apply(result, ops);</span>
+            }
+
+<span class="nc" id="L49">            return result;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

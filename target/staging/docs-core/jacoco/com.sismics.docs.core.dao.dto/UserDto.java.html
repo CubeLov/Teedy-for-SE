@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao.dto</a> &gt; <span class="el_source">UserDto.java</span></div><h1>UserDto.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao.dto;
+
+import com.google.common.base.MoreObjects;
+
+/**
+ * User DTO.
+ *
+ * @author jtremeaux 
+ */
+<span class="nc" id="L10">public class UserDto {</span>
+    /**
+     * User ID.
+     */
+    private String id;
+    
+    /**
+     * Username.
+     */
+    private String username;
+    
+    /**
+     * Email address.
+     */
+    private String email;
+    
+    /**
+     * Creation date of this user.
+     */
+    private Long createTimestamp;
+
+    /**
+     * Disable date of this user.
+     */
+    private Long disableTimestamp;
+
+    /**
+     * Storage quota.
+     */
+    private Long storageQuota;
+    
+    /**
+     * Storage current usage.
+     */
+    private Long storageCurrent;
+
+    /**
+     * TOTP key.
+     */
+    private String totpKey;
+
+    public String getId() {
+<span class="nc" id="L52">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L56">        this.id = id;</span>
+<span class="nc" id="L57">    }</span>
+
+    public String getUsername() {
+<span class="nc" id="L60">        return username;</span>
+    }
+
+    public void setUsername(String username) {
+<span class="nc" id="L64">        this.username = username;</span>
+<span class="nc" id="L65">    }</span>
+
+    public String getEmail() {
+<span class="nc" id="L68">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="nc" id="L72">        this.email = email;</span>
+<span class="nc" id="L73">    }</span>
+
+    public Long getCreateTimestamp() {
+<span class="nc" id="L76">        return createTimestamp;</span>
+    }
+    
+    public void setCreateTimestamp(Long createTimestamp) {
+<span class="nc" id="L80">        this.createTimestamp = createTimestamp;</span>
+<span class="nc" id="L81">    }</span>
+
+    public Long getDisableTimestamp() {
+<span class="nc" id="L84">        return disableTimestamp;</span>
+    }
+
+    public UserDto setDisableTimestamp(Long disableTimestamp) {
+<span class="nc" id="L88">        this.disableTimestamp = disableTimestamp;</span>
+<span class="nc" id="L89">        return this;</span>
+    }
+
+    public Long getStorageQuota() {
+<span class="nc" id="L93">        return storageQuota;</span>
+    }
+
+    public void setStorageQuota(Long storageQuota) {
+<span class="nc" id="L97">        this.storageQuota = storageQuota;</span>
+<span class="nc" id="L98">    }</span>
+
+    public Long getStorageCurrent() {
+<span class="nc" id="L101">        return storageCurrent;</span>
+    }
+
+    public void setStorageCurrent(Long storageCurrent) {
+<span class="nc" id="L105">        this.storageCurrent = storageCurrent;</span>
+<span class="nc" id="L106">    }</span>
+
+    public String getTotpKey() {
+<span class="nc" id="L109">        return totpKey;</span>
+    }
+
+    public void setTotpKey(String totpKey) {
+<span class="nc" id="L113">        this.totpKey = totpKey;</span>
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L118">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L119">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L120">                .add(&quot;username&quot;, username)</span>
+<span class="nc" id="L121">                .add(&quot;email&quot;, email)</span>
+<span class="nc" id="L122">                .toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

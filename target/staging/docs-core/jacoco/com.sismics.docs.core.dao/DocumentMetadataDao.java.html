@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentMetadataDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">DocumentMetadataDao.java</span></div><h1>DocumentMetadataDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.sismics.docs.core.constant.MetadataType;
+import com.sismics.docs.core.dao.dto.DocumentMetadataDto;
+import com.sismics.docs.core.model.jpa.DocumentMetadata;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Document metadata DAO.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L19">public class DocumentMetadataDao {</span>
+    /**
+     * Creates a new document metadata.
+     *
+     * @param documentMetadata Document metadata
+     * @return New ID
+     */
+    public String create(DocumentMetadata documentMetadata) {
+        // Create the UUID
+<span class="nc" id="L28">        documentMetadata.setId(UUID.randomUUID().toString());</span>
+
+        // Create the document metadata
+<span class="nc" id="L31">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L32">        em.persist(documentMetadata);</span>
+
+<span class="nc" id="L34">        return documentMetadata.getId();</span>
+    }
+
+    /**
+     * Updates a document metadata.
+     *
+     * @param documentMetadata Document metadata
+     * @return Updated document metadata
+     */
+    public DocumentMetadata update(DocumentMetadata documentMetadata) {
+<span class="nc" id="L44">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+
+        // Get the document metadata
+<span class="nc" id="L47">        Query q = em.createQuery(&quot;select u from DocumentMetadata u where u.id = :id&quot;);</span>
+<span class="nc" id="L48">        q.setParameter(&quot;id&quot;, documentMetadata.getId());</span>
+<span class="nc" id="L49">        DocumentMetadata documentMetadataDb = (DocumentMetadata) q.getSingleResult();</span>
+
+        // Update the document metadata
+<span class="nc" id="L52">        documentMetadataDb.setValue(documentMetadata.getValue());</span>
+
+<span class="nc" id="L54">        return documentMetadata;</span>
+    }
+
+    /**
+     * Returns the list of all metadata values on a document.
+     *
+     * @param documentId Document ID
+     * @return List of metadata
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public List&lt;DocumentMetadataDto&gt; getByDocumentId(String documentId) {
+<span class="nc" id="L65">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L66">        StringBuilder sb = new StringBuilder(&quot;select dm.DME_ID_C, dm.DME_IDDOCUMENT_C, dm.DME_IDMETADATA_C, dm.DME_VALUE_C, m.MET_TYPE_C&quot;);</span>
+<span class="nc" id="L67">        sb.append(&quot; from T_DOCUMENT_METADATA dm, T_METADATA m &quot;);</span>
+<span class="nc" id="L68">        sb.append(&quot; where dm.DME_IDMETADATA_C = m.MET_ID_C and dm.DME_IDDOCUMENT_C = :documentId and m.MET_DELETEDATE_D is null&quot;);</span>
+
+        // Perform the search
+<span class="nc" id="L71">        Query q = em.createNativeQuery(sb.toString());</span>
+<span class="nc" id="L72">        q.setParameter(&quot;documentId&quot;, documentId);</span>
+<span class="nc" id="L73">        List&lt;Object[]&gt; l = q.getResultList();</span>
+
+        // Assemble results
+<span class="nc" id="L76">        List&lt;DocumentMetadataDto&gt; dtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L78">            int i = 0;</span>
+<span class="nc" id="L79">            DocumentMetadataDto dto = new DocumentMetadataDto();</span>
+<span class="nc" id="L80">            dto.setId((String) o[i++]);</span>
+<span class="nc" id="L81">            dto.setDocumentId((String) o[i++]);</span>
+<span class="nc" id="L82">            dto.setMetadataId((String) o[i++]);</span>
+<span class="nc" id="L83">            dto.setValue((String) o[i++]);</span>
+<span class="nc" id="L84">            dto.setType(MetadataType.valueOf((String) o[i]));</span>
+<span class="nc" id="L85">            dtoList.add(dto);</span>
+<span class="nc" id="L86">        }</span>
+<span class="nc" id="L87">        return dtoList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

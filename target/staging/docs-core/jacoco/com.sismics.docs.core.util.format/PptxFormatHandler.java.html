@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PptxFormatHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.format</a> &gt; <span class="el_source">PptxFormatHandler.java</span></div><h1>PptxFormatHandler.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.format;
+
+import com.google.common.io.Closer;
+import com.sismics.util.mime.MimeType;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.poi.sl.extractor.SlideShowExtractor;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+/**
+ * PPTX format handler.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L29">public class PptxFormatHandler implements FormatHandler {</span>
+    /**
+     * Cached PPTX loaded file.
+     */
+    private XMLSlideShow slideShow;
+
+    @Override
+    public boolean accept(String mimeType) {
+<span class="nc" id="L37">        return MimeType.OFFICE_PRESENTATION.equals(mimeType);</span>
+    }
+
+    @Override
+    public BufferedImage generateThumbnail(Path file) throws Exception {
+<span class="nc" id="L42">        XMLSlideShow pptx = loadPPtxFile(file);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (pptx.getSlides().size() &gt; 0) {</span>
+<span class="nc" id="L44">            return generateImageFromSlide(pptx, 0);</span>
+        }
+
+<span class="nc" id="L47">        return null;</span>
+    }
+
+    @Override
+    public String extractContent(String language, Path file) throws Exception {
+<span class="nc" id="L52">        XMLSlideShow pptx = loadPPtxFile(file);</span>
+<span class="nc" id="L53">        return new SlideShowExtractor&lt;&gt;(pptx).getText();</span>
+    }
+
+    @Override
+    public void appendToPdf(Path file, PDDocument doc, boolean fitImageToPage, int margin, MemoryUsageSetting memUsageSettings, Closer closer) throws Exception {
+<span class="nc" id="L58">        XMLSlideShow pptx = loadPPtxFile(file);</span>
+<span class="nc" id="L59">        List&lt;XSLFSlide&gt; slides = pptx.getSlides();</span>
+<span class="nc" id="L60">        Dimension pgsize = pptx.getPageSize();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for (int slideIndex = 0; slideIndex &lt; slides.size(); slideIndex++) {</span>
+            // One PDF page per slide
+<span class="nc" id="L63">            PDPage page = new PDPage(new PDRectangle(pgsize.width, pgsize.height));</span>
+<span class="nc" id="L64">            try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {</span>
+<span class="nc" id="L65">                BufferedImage bim = generateImageFromSlide(pptx, slideIndex);</span>
+<span class="nc" id="L66">                PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bim);</span>
+<span class="nc" id="L67">                contentStream.drawImage(pdImage, 0, page.getMediaBox().getHeight() - pdImage.getHeight());</span>
+            }
+<span class="nc" id="L69">            doc.addPage(page);</span>
+        }
+<span class="nc" id="L71">    }</span>
+
+    private XMLSlideShow loadPPtxFile(Path file) throws Exception {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (slideShow == null) {</span>
+<span class="nc" id="L75">            try (InputStream inputStream = Files.newInputStream(file)) {</span>
+<span class="nc" id="L76">                slideShow = new XMLSlideShow(inputStream);</span>
+            }
+        }
+<span class="nc" id="L79">        return slideShow;</span>
+    }
+
+    /**
+     * Generate an image from a PPTX slide.
+     *
+     * @param pptx PPTX
+     * @param slideIndex Slide index
+     * @return Image
+     */
+    private BufferedImage generateImageFromSlide(XMLSlideShow pptx, int slideIndex) {
+<span class="nc" id="L90">        Dimension pgsize = pptx.getPageSize();</span>
+<span class="nc" id="L91">        BufferedImage img = new BufferedImage(pgsize.width, pgsize.height,BufferedImage.TYPE_INT_RGB);</span>
+<span class="nc" id="L92">        Graphics2D graphics = img.createGraphics();</span>
+<span class="nc" id="L93">        graphics.setPaint(Color.white);</span>
+<span class="nc" id="L94">        graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));</span>
+<span class="nc" id="L95">        pptx.getSlides().get(slideIndex).draw(graphics);</span>
+<span class="nc" id="L96">        return img;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

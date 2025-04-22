@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetadataUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util</a> &gt; <span class="el_source">MetadataUtil.java</span></div><h1>MetadataUtil.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util;
+
+import com.google.common.collect.Maps;
+import com.sismics.docs.core.constant.MetadataType;
+import com.sismics.docs.core.dao.DocumentMetadataDao;
+import com.sismics.docs.core.dao.MetadataDao;
+import com.sismics.docs.core.dao.criteria.MetadataCriteria;
+import com.sismics.docs.core.dao.dto.DocumentMetadataDto;
+import com.sismics.docs.core.dao.dto.MetadataDto;
+import com.sismics.docs.core.model.jpa.DocumentMetadata;
+import com.sismics.docs.core.util.jpa.SortCriteria;
+
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Metadata utilities.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L25">public class MetadataUtil {</span>
+    /**
+     * Update custom metadata on a document.
+     *
+     * @param documentId Document ID
+     * @param metadataIdList Metadata ID list
+     * @param metadataValueList Metadata value list
+     */
+    public static void updateMetadata(String documentId, List&lt;String&gt; metadataIdList, List&lt;String&gt; metadataValueList) throws Exception {
+<span class="nc bnc" id="L34" title="All 6 branches missed.">        if (metadataIdList == null || metadataValueList == null || metadataIdList.isEmpty()) {</span>
+<span class="nc" id="L35">            return;</span>
+        }
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (metadataIdList.size() != metadataValueList.size()) {</span>
+<span class="nc" id="L38">            throw new Exception(&quot;metadata_id and metadata_value must have the same length&quot;);</span>
+        }
+
+<span class="nc" id="L41">        Map&lt;String, String&gt; newValues = Maps.newHashMap();</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (int i = 0; i &lt; metadataIdList.size(); i++) {</span>
+<span class="nc" id="L43">            newValues.put(metadataIdList.get(i), metadataValueList.get(i));</span>
+        }
+
+<span class="nc" id="L46">        MetadataDao metadataDao = new MetadataDao();</span>
+<span class="nc" id="L47">        DocumentMetadataDao documentMetadataDao = new DocumentMetadataDao();</span>
+<span class="nc" id="L48">        List&lt;MetadataDto&gt; metadataDtoList = metadataDao.findByCriteria(new MetadataCriteria(), null);</span>
+<span class="nc" id="L49">        List&lt;DocumentMetadataDto&gt; documentMetadataDtoList = documentMetadataDao.getByDocumentId(documentId);</span>
+
+        // Update existing values
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        for (DocumentMetadataDto documentMetadataDto : documentMetadataDtoList) {</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (newValues.containsKey(documentMetadataDto.getMetadataId())) {</span>
+                // Update the value
+<span class="nc" id="L55">                String value = newValues.get(documentMetadataDto.getMetadataId());</span>
+<span class="nc" id="L56">                validateValue(documentMetadataDto.getType(), value);</span>
+<span class="nc" id="L57">                updateValue(documentMetadataDto.getId(), value);</span>
+<span class="nc" id="L58">                newValues.remove(documentMetadataDto.getMetadataId());</span>
+<span class="nc" id="L59">            } else {</span>
+                // Remove the value
+<span class="nc" id="L61">                updateValue(documentMetadataDto.getId(), null);</span>
+            }
+<span class="nc" id="L63">        }</span>
+
+        // Create new values
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        for (Map.Entry&lt;String, String&gt; entry : newValues.entrySet()) {</span>
+            // Search the metadata definition
+<span class="nc" id="L68">            MetadataDto metadata = null;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            for (MetadataDto metadataDto : metadataDtoList) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                if (metadataDto.getId().equals(entry.getKey())) {</span>
+<span class="nc" id="L71">                    metadata = metadataDto;</span>
+<span class="nc" id="L72">                    break;</span>
+                }
+<span class="nc" id="L74">            }</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">            if (metadata == null) {</span>
+<span class="nc" id="L77">                throw new Exception(MessageFormat.format(&quot;Metadata not found: {0}&quot;, entry.getKey()));</span>
+            }
+
+            // Add the value
+<span class="nc" id="L81">            validateValue(metadata.getType(), entry.getValue());</span>
+<span class="nc" id="L82">            createValue(documentId, entry.getKey(), entry.getValue());</span>
+<span class="nc" id="L83">        }</span>
+<span class="nc" id="L84">    }</span>
+
+    /**
+     * Validate a custom metadata value.
+     *
+     * @param type Metadata type
+     * @param value Value
+     * @throws Exception In case of validation error
+     */
+    private static void validateValue(MetadataType type, String value) throws Exception {
+<span class="nc bnc" id="L94" title="All 5 branches missed.">        switch (type) {</span>
+            case STRING:
+            case BOOLEAN:
+<span class="nc" id="L97">                return;</span>
+            case DATE:
+                try {
+<span class="nc" id="L100">                    Long.parseLong(value);</span>
+<span class="nc" id="L101">                } catch (NumberFormatException e) {</span>
+<span class="nc" id="L102">                    throw new Exception(&quot;Date value not parsable as timestamp&quot;);</span>
+<span class="nc" id="L103">                }</span>
+                break;
+            case FLOAT:
+                try {
+<span class="nc" id="L107">                    Double.parseDouble(value);</span>
+<span class="nc" id="L108">                } catch (NumberFormatException e) {</span>
+<span class="nc" id="L109">                    throw new Exception(&quot;Float value not parsable&quot;);</span>
+<span class="nc" id="L110">                }</span>
+                break;
+            case INTEGER:
+                try {
+<span class="nc" id="L114">                    Integer.parseInt(value);</span>
+<span class="nc" id="L115">                } catch (NumberFormatException e) {</span>
+<span class="nc" id="L116">                    throw new Exception(&quot;Integer value not parsable&quot;);</span>
+<span class="nc" id="L117">                }</span>
+                break;
+        }
+<span class="nc" id="L120">    }</span>
+
+    /**
+     * Create a custom metadata value on a document.
+     *
+     * @param documentId Document ID
+     * @param metadataId Metadata ID
+     * @param value Value
+     */
+    private static void createValue(String documentId, String metadataId, String value) {
+<span class="nc" id="L130">        DocumentMetadataDao documentMetadataDao = new DocumentMetadataDao();</span>
+<span class="nc" id="L131">        DocumentMetadata documentMetadata = new DocumentMetadata();</span>
+<span class="nc" id="L132">        documentMetadata.setDocumentId(documentId);</span>
+<span class="nc" id="L133">        documentMetadata.setMetadataId(metadataId);</span>
+<span class="nc" id="L134">        documentMetadata.setValue(value);</span>
+<span class="nc" id="L135">        documentMetadataDao.create(documentMetadata);</span>
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Update a custom metadata value.
+     *
+     * @param documentMetadataId Document metadata ID
+     * @param value Value
+     */
+    private static void updateValue(String documentMetadataId, String value) {
+<span class="nc" id="L145">        DocumentMetadataDao documentMetadataDao = new DocumentMetadataDao();</span>
+<span class="nc" id="L146">        DocumentMetadata documentMetadata = new DocumentMetadata();</span>
+<span class="nc" id="L147">        documentMetadata.setId(documentMetadataId);</span>
+<span class="nc" id="L148">        documentMetadata.setValue(value);</span>
+<span class="nc" id="L149">        documentMetadataDao.update(documentMetadata);</span>
+<span class="nc" id="L150">    }</span>
+
+    /**
+     * Add custom metadata to a JSON response.
+     *
+     * @param json JSON
+     * @param documentId Document ID
+     */
+    public static void addMetadata(JsonObjectBuilder json, String documentId) {
+<span class="nc" id="L159">        DocumentMetadataDao documentMetadataDao = new DocumentMetadataDao();</span>
+<span class="nc" id="L160">        MetadataDao metadataDao = new MetadataDao();</span>
+<span class="nc" id="L161">        List&lt;MetadataDto&gt; metadataDtoList = metadataDao.findByCriteria(new MetadataCriteria(), new SortCriteria(1, true));</span>
+<span class="nc" id="L162">        List&lt;DocumentMetadataDto&gt; documentMetadataDtoList = documentMetadataDao.getByDocumentId(documentId);</span>
+<span class="nc" id="L163">        JsonArrayBuilder metadata = Json.createArrayBuilder();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        for (MetadataDto metadataDto : metadataDtoList) {</span>
+<span class="nc" id="L165">            JsonObjectBuilder meta = Json.createObjectBuilder()</span>
+<span class="nc" id="L166">                    .add(&quot;id&quot;, metadataDto.getId())</span>
+<span class="nc" id="L167">                    .add(&quot;name&quot;, metadataDto.getName())</span>
+<span class="nc" id="L168">                    .add(&quot;type&quot;, metadataDto.getType().name());</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">            for (DocumentMetadataDto documentMetadataDto : documentMetadataDtoList) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                if (documentMetadataDto.getMetadataId().equals(metadataDto.getId())) {</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                    if (documentMetadataDto.getValue() != null) {</span>
+<span class="nc bnc" id="L172" title="All 6 branches missed.">                        switch (metadataDto.getType()) {</span>
+                            case STRING:
+<span class="nc" id="L174">                                meta.add(&quot;value&quot;, documentMetadataDto.getValue());</span>
+<span class="nc" id="L175">                                break;</span>
+                            case BOOLEAN:
+<span class="nc" id="L177">                                meta.add(&quot;value&quot;, Boolean.parseBoolean(documentMetadataDto.getValue()));</span>
+<span class="nc" id="L178">                                break;</span>
+                            case DATE:
+<span class="nc" id="L180">                                meta.add(&quot;value&quot;, Long.parseLong(documentMetadataDto.getValue()));</span>
+<span class="nc" id="L181">                                break;</span>
+                            case FLOAT:
+<span class="nc" id="L183">                                meta.add(&quot;value&quot;, Double.parseDouble(documentMetadataDto.getValue()));</span>
+<span class="nc" id="L184">                                break;</span>
+                            case INTEGER:
+<span class="nc" id="L186">                                meta.add(&quot;value&quot;, Integer.parseInt(documentMetadataDto.getValue()));</span>
+                                break;
+                        }
+                    }
+                }
+<span class="nc" id="L191">            }</span>
+<span class="nc" id="L192">            metadata.add(meta);</span>
+<span class="nc" id="L193">        }</span>
+<span class="nc" id="L194">        json.add(&quot;metadata&quot;, metadata);</span>
+<span class="nc" id="L195">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

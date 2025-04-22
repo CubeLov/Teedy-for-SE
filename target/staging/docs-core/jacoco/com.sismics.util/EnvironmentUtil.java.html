@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnvironmentUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.util</a> &gt; <span class="el_source">EnvironmentUtil.java</span></div><h1>EnvironmentUtil.java</h1><pre class="source lang-java linenums">package com.sismics.util;
+
+/**
+ * Environment properties utilities.
+ *
+ * @author jtremeaux
+ */
+<span class="nc" id="L8">public class EnvironmentUtil {</span>
+
+<span class="nc" id="L10">    private static String OS = System.getProperty(&quot;os.name&quot;).toLowerCase();</span>
+
+<span class="nc" id="L12">    private static String APPLICATION_MODE = System.getProperty(&quot;application.mode&quot;);</span>
+
+<span class="nc" id="L14">    private static String WINDOWS_APPDATA = System.getenv(&quot;APPDATA&quot;);</span>
+
+<span class="nc" id="L16">    private static String MAC_OS_USER_HOME = System.getProperty(&quot;user.home&quot;);</span>
+
+<span class="nc" id="L18">    private static String TEEDY_HOME = System.getProperty(&quot;docs.home&quot;);</span>
+
+    /**
+     * In a web application context.
+     */
+    private static boolean webappContext;
+
+    /**
+     * Returns true if running under Microsoft Windows.
+     *
+     * @return Running under Microsoft Windows
+     */
+    public static boolean isWindows() {
+<span class="nc" id="L31">        return OS.contains(&quot;win&quot;);</span>
+    }
+
+    /**
+     * Returns true if running under Mac OS.
+     *
+     * @return Running under Mac OS
+     */
+    public static boolean isMacOs() {
+<span class="nc" id="L40">        return OS.contains(&quot;mac&quot;);</span>
+    }
+
+    /**
+     * Returns true if running under UNIX.
+     *
+     * @return Running under UNIX
+     */
+    public static boolean isUnix() {
+<span class="nc bnc" id="L49" title="All 6 branches missed.">        return OS.contains(&quot;nix&quot;) || OS.contains(&quot;nux&quot;) || OS.contains(&quot;aix&quot;);</span>
+    }
+
+    /**
+     * Returns true if we are in a unit testing environment.
+     *
+     * @return Unit testing environment
+     */
+    public static boolean isUnitTest() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return !webappContext;</span>
+    }
+
+    /**
+     * Return true if we are in dev mode.
+     *
+     * @return Dev mode
+     */
+    public static boolean isDevMode() {
+<span class="nc" id="L67">        return &quot;dev&quot;.equalsIgnoreCase(APPLICATION_MODE);</span>
+    }
+
+    /**
+     * Returns the MS Windows AppData directory of this user.
+     *
+     * @return AppData directory
+     */
+    public static String getWindowsAppData() {
+<span class="nc" id="L76">        return WINDOWS_APPDATA;</span>
+    }
+
+    /**
+     * Returns the Mac OS home directory of this user.
+     *
+     * @return Home directory
+     */
+    public static String getMacOsUserHome() {
+<span class="nc" id="L85">        return MAC_OS_USER_HOME;</span>
+    }
+
+    /**
+     * Returns the home directory of DOCS (e.g. /var/docs).
+     *
+     * @return Home directory
+     */
+    public static String getTeedyHome() {
+<span class="nc" id="L94">        return TEEDY_HOME;</span>
+    }
+
+    /**
+     * Getter of webappContext.
+     *
+     * @return webappContext
+     */
+    public static boolean isWebappContext() {
+<span class="nc" id="L103">        return webappContext;</span>
+    }
+
+    /**
+     * Setter of webappContext.
+     *
+     * @param webappContext webappContext
+     */
+    public static void setWebappContext(boolean webappContext) {
+<span class="nc" id="L112">        EnvironmentUtil.webappContext = webappContext;</span>
+<span class="nc" id="L113">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

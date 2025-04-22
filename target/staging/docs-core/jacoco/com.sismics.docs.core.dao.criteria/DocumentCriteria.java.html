@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentCriteria.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao.criteria</a> &gt; <span class="el_source">DocumentCriteria.java</span></div><h1>DocumentCriteria.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao.criteria;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+
+/**
+ * Document criteria.
+ *
+ * @author bgamard 
+ */
+<span class="nc" id="L13">public class DocumentCriteria {</span>
+    /**
+     * ACL target ID list.
+     */
+    private List&lt;String&gt; targetIdList;
+    
+    /**
+     * Search query.
+     */
+    private String simpleSearch;
+    
+    /**
+     * Full content search query.
+     */
+    private String fullSearch;
+    
+    /**
+     * Minimum creation date.
+     */
+    private Date createDateMin;
+    
+    /**
+     * Maximum creation date.
+     */
+    private Date createDateMax;
+    
+    /**
+     * Minimum update date.
+     */
+    private Date updateDateMin;
+
+    /**
+     * Maximum update date.
+     */
+    private Date updateDateMax;
+
+    /**
+     * Tag IDs.
+     * The first level list will be AND'ed and the second level list will be OR'ed.
+     */
+<span class="nc" id="L53">    private List&lt;List&lt;String&gt;&gt; tagIdList = new ArrayList&lt;&gt;();</span>
+    
+    /**
+     * Tag IDs to exclude.
+     * The first and second level list will be excluded.
+     */
+<span class="nc" id="L59">    private List&lt;List&lt;String&gt;&gt; excludedTagIdList = new ArrayList&lt;&gt;();</span>
+
+    /**
+     * Shared status.
+     */
+    private Boolean shared;
+    
+    /**
+     * Language.
+     */
+    private String language;
+    
+    /**
+     * Creator ID.
+     */
+    private String creatorId;
+
+    /**
+     * A route is active.
+     */
+    private Boolean activeRoute;
+
+    /**
+     * MIME type of a file.
+     */
+    private String mimeType;
+
+    /**
+     * Titles to include.
+     */
+<span class="nc" id="L89">    private List&lt;String&gt; titleList = new ArrayList&lt;&gt;();</span>
+
+    public List&lt;String&gt; getTargetIdList() {
+<span class="nc" id="L92">        return targetIdList;</span>
+    }
+
+    public void setTargetIdList(List&lt;String&gt; targetIdList) {
+<span class="nc" id="L96">        this.targetIdList = targetIdList;</span>
+<span class="nc" id="L97">    }</span>
+
+    public String getSimpleSearch() {
+<span class="nc" id="L100">        return simpleSearch;</span>
+    }
+
+    public void setSimpleSearch(String search) {
+<span class="nc" id="L104">        this.simpleSearch = search;</span>
+<span class="nc" id="L105">    }</span>
+
+    public String getFullSearch() {
+<span class="nc" id="L108">        return fullSearch;</span>
+    }
+
+    public void setFullSearch(String fullSearch) {
+<span class="nc" id="L112">        this.fullSearch = fullSearch;</span>
+<span class="nc" id="L113">    }</span>
+
+    public Date getCreateDateMin() {
+<span class="nc" id="L116">        return createDateMin;</span>
+    }
+
+    public void setCreateDateMin(Date createDateMin) {
+<span class="nc" id="L120">        this.createDateMin = createDateMin;</span>
+<span class="nc" id="L121">    }</span>
+
+    public Date getCreateDateMax() {
+<span class="nc" id="L124">        return createDateMax;</span>
+    }
+
+    public void setCreateDateMax(Date createDateMax) {
+<span class="nc" id="L128">        this.createDateMax = createDateMax;</span>
+<span class="nc" id="L129">    }</span>
+
+    public List&lt;List&lt;String&gt;&gt; getTagIdList() {
+<span class="nc" id="L132">        return tagIdList;</span>
+    }
+
+    public List&lt;List&lt;String&gt;&gt; getExcludedTagIdList() {
+<span class="nc" id="L136">        return excludedTagIdList;</span>
+    }
+
+    public Boolean getShared() {
+<span class="nc" id="L140">        return shared;</span>
+    }
+
+    public void setShared(Boolean shared) {
+<span class="nc" id="L144">        this.shared = shared;</span>
+<span class="nc" id="L145">    }</span>
+
+    public String getLanguage() {
+<span class="nc" id="L148">        return language;</span>
+    }
+
+    public void setLanguage(String language) {
+<span class="nc" id="L152">        this.language = language;</span>
+<span class="nc" id="L153">    }</span>
+
+    public String getCreatorId() {
+<span class="nc" id="L156">        return creatorId;</span>
+    }
+
+    public void setCreatorId(String creatorId) {
+<span class="nc" id="L160">        this.creatorId = creatorId;</span>
+<span class="nc" id="L161">    }</span>
+ 
+    public Date getUpdateDateMin() {
+<span class="nc" id="L164">        return updateDateMin;</span>
+    }
+
+    public void setUpdateDateMin(Date updateDateMin) {
+<span class="nc" id="L168">        this.updateDateMin = updateDateMin;</span>
+<span class="nc" id="L169">    }</span>
+
+    public Date getUpdateDateMax() {
+<span class="nc" id="L172">        return updateDateMax;</span>
+    }
+
+    public void setUpdateDateMax(Date updateDateMax) {
+<span class="nc" id="L176">        this.updateDateMax = updateDateMax;</span>
+<span class="nc" id="L177">    }</span>
+
+    public Boolean getActiveRoute() {
+<span class="nc" id="L180">        return activeRoute;</span>
+    }
+
+    public void setActiveRoute(Boolean activeRoute) {
+<span class="nc" id="L184">        this.activeRoute = activeRoute;</span>
+<span class="nc" id="L185">    }</span>
+
+    public String getMimeType() {
+<span class="nc" id="L188">        return mimeType;</span>
+    }
+
+    public void setMimeType(String mimeType) {
+<span class="nc" id="L192">        this.mimeType = mimeType;</span>
+<span class="nc" id="L193">    }</span>
+
+    public List&lt;String&gt; getTitleList() {
+<span class="nc" id="L196">        return titleList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

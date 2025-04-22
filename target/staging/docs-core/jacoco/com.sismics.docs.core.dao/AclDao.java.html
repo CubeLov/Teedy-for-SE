@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AclDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">AclDao.java</span></div><h1>AclDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.sismics.docs.core.constant.AclTargetType;
+import com.sismics.docs.core.constant.AclType;
+import com.sismics.docs.core.constant.AuditLogType;
+import com.sismics.docs.core.constant.PermType;
+import com.sismics.docs.core.dao.dto.AclDto;
+import com.sismics.docs.core.model.jpa.Acl;
+import com.sismics.docs.core.util.AuditLogUtil;
+import com.sismics.docs.core.util.SecurityUtil;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * ACL DAO.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L25">public class AclDao {</span>
+    /**
+     * Creates a new ACL.
+     *
+     * @param acl ACL
+     * @param userId User ID
+     * @return New ID
+     */
+    public String create(Acl acl, String userId) {
+        // Create the UUID
+<span class="nc" id="L35">        acl.setId(UUID.randomUUID().toString());</span>
+
+        // Create the ACL
+<span class="nc" id="L38">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L39">        em.persist(acl);</span>
+
+        // Create audit log
+<span class="nc" id="L42">        AuditLogUtil.create(acl, AuditLogType.CREATE, userId);</span>
+
+<span class="nc" id="L44">        return acl.getId();</span>
+    }
+
+    /**
+     * Search ACLs by target ID.
+     *
+     * @param targetId Target ID
+     * @return ACL list
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public List&lt;Acl&gt; getByTargetId(String targetId) {
+<span class="nc" id="L55">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L56">        Query q = em.createQuery(&quot;select a from Acl a where a.targetId = :targetId and a.deleteDate is null&quot;);</span>
+<span class="nc" id="L57">        q.setParameter(&quot;targetId&quot;, targetId);</span>
+
+<span class="nc" id="L59">        return q.getResultList();</span>
+    }
+
+    /**
+     * Search ACLs by source ID.
+     *
+     * @param sourceId Source ID
+     * @return ACL DTO list
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public List&lt;AclDto&gt; getBySourceId(String sourceId, AclType type) {
+<span class="nc" id="L70">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L71">        StringBuilder sb = new StringBuilder(&quot;select a.ACL_ID_C, a.ACL_PERM_C, a.ACL_TARGETID_C, &quot;)</span>
+<span class="nc" id="L72">                .append(&quot; u.USE_USERNAME_C, s.SHA_ID_C, s.SHA_NAME_C, g.GRP_NAME_C &quot;)</span>
+<span class="nc" id="L73">                .append(&quot; from T_ACL a &quot;)</span>
+<span class="nc" id="L74">                .append(&quot; left join T_USER u on u.USE_ID_C = a.ACL_TARGETID_C &quot;)</span>
+<span class="nc" id="L75">                .append(&quot; left join T_SHARE s on s.SHA_ID_C = a.ACL_TARGETID_C &quot;)</span>
+<span class="nc" id="L76">                .append(&quot; left join T_GROUP g on g.GRP_ID_C = a.ACL_TARGETID_C &quot;)</span>
+<span class="nc" id="L77">                .append(&quot; where a.ACL_DELETEDATE_D is null and a.ACL_SOURCEID_C = :sourceId &quot;);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (type != null) {</span>
+<span class="nc" id="L79">            sb.append(&quot; and a.ACL_TYPE_C = :type&quot;);</span>
+        }
+
+        // Perform the query
+<span class="nc" id="L83">        Query q = em.createNativeQuery(sb.toString());</span>
+<span class="nc" id="L84">        q.setParameter(&quot;sourceId&quot;, sourceId);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (type != null) {</span>
+<span class="nc" id="L86">            q.setParameter(&quot;type&quot;, type.name());</span>
+        }
+<span class="nc" id="L88">        List&lt;Object[]&gt; l = q.getResultList();</span>
+
+        // Assemble results
+<span class="nc" id="L91">        List&lt;AclDto&gt; aclDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L93">            int i = 0;</span>
+<span class="nc" id="L94">            AclDto aclDto = new AclDto();</span>
+<span class="nc" id="L95">            aclDto.setId((String) o[i++]);</span>
+<span class="nc" id="L96">            aclDto.setPerm(PermType.valueOf((String) o[i++]));</span>
+<span class="nc" id="L97">            aclDto.setTargetId((String) o[i++]);</span>
+<span class="nc" id="L98">            String userName = (String) o[i++];</span>
+<span class="nc" id="L99">            String shareId = (String) o[i++];</span>
+<span class="nc" id="L100">            String shareName = (String) o[i++];</span>
+<span class="nc" id="L101">            String groupName = (String) o[i];</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (userName != null) {</span>
+<span class="nc" id="L103">                aclDto.setTargetName(userName);</span>
+<span class="nc" id="L104">                aclDto.setTargetType(AclTargetType.USER.name());</span>
+            }
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            if (shareId != null) { // Use ID because share name is nullable</span>
+<span class="nc" id="L107">                aclDto.setTargetName(shareName);</span>
+<span class="nc" id="L108">                aclDto.setTargetType(AclTargetType.SHARE.name());</span>
+            }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (groupName != null) {</span>
+<span class="nc" id="L111">                aclDto.setTargetName(groupName);</span>
+<span class="nc" id="L112">                aclDto.setTargetType(AclTargetType.GROUP.name());</span>
+            }
+<span class="nc" id="L114">            aclDtoList.add(aclDto);</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">        return aclDtoList;</span>
+    }
+
+    /**
+     * Check if a source is accessible to a target.
+     *
+     * @param sourceId ACL source entity ID
+     * @param perm Necessary permission
+     * @param targetIdList List of targets
+     * @return True if the document is accessible
+     */
+    public boolean checkPermission(String sourceId, PermType perm, List&lt;String&gt; targetIdList) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (SecurityUtil.skipAclCheck(targetIdList)) {</span>
+<span class="nc" id="L129">            return true;</span>
+        }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (targetIdList.isEmpty()) {</span>
+<span class="nc" id="L132">            return false;</span>
+        }
+
+<span class="nc" id="L135">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L136">        StringBuilder sb = new StringBuilder(&quot;select a.ACL_ID_C from T_ACL a &quot;);</span>
+<span class="nc" id="L137">        sb.append(&quot; where a.ACL_TARGETID_C in (:targetIdList) and a.ACL_SOURCEID_C = :sourceId and a.ACL_PERM_C = :perm and a.ACL_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L138">        sb.append(&quot; union all &quot;);</span>
+<span class="nc" id="L139">        sb.append(&quot; select a.ACL_ID_C from T_ACL a, T_DOCUMENT_TAG dt, T_DOCUMENT d &quot;);</span>
+<span class="nc" id="L140">        sb.append(&quot; where a.ACL_SOURCEID_C = dt.DOT_IDTAG_C and dt.DOT_IDDOCUMENT_C = d.DOC_ID_C and dt.DOT_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L141">        sb.append(&quot; and d.DOC_ID_C = :sourceId and d.DOC_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L142">        sb.append(&quot; and a.ACL_TARGETID_C in (:targetIdList) and a.ACL_PERM_C = :perm and a.ACL_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L143">        Query q = em.createNativeQuery(sb.toString());</span>
+<span class="nc" id="L144">        q.setParameter(&quot;sourceId&quot;, sourceId);</span>
+<span class="nc" id="L145">        q.setParameter(&quot;perm&quot;, perm.name());</span>
+<span class="nc" id="L146">        q.setParameter(&quot;targetIdList&quot;, targetIdList);</span>
+
+        // We have a matching permission
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        return q.getResultList().size() &gt; 0;</span>
+    }
+
+    /**
+     * Delete an ACL.
+     *
+     * @param sourceId Source ID
+     * @param perm Permission
+     * @param targetId Target ID
+     * @param userId User ID
+     * @param type Type
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public void delete(String sourceId, PermType perm, String targetId, String userId, AclType type) {
+<span class="nc" id="L163">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+
+        // Create audit log
+<span class="nc" id="L166">        Query q = em.createQuery(&quot;from Acl a where a.sourceId = :sourceId and a.perm = :perm and a.targetId = :targetId and a.type = :type and a.deleteDate is null&quot;);</span>
+<span class="nc" id="L167">        q.setParameter(&quot;sourceId&quot;, sourceId);</span>
+<span class="nc" id="L168">        q.setParameter(&quot;perm&quot;, perm);</span>
+<span class="nc" id="L169">        q.setParameter(&quot;targetId&quot;, targetId);</span>
+<span class="nc" id="L170">        q.setParameter(&quot;type&quot;, type);</span>
+<span class="nc" id="L171">        List&lt;Acl&gt; aclList = q.getResultList();</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        for (Acl acl : aclList) {</span>
+<span class="nc" id="L173">            AuditLogUtil.create(acl, AuditLogType.DELETE, userId);</span>
+<span class="nc" id="L174">        }</span>
+
+        // Soft delete the ACLs
+<span class="nc" id="L177">        q = em.createQuery(&quot;update Acl a set a.deleteDate = :dateNow where a.sourceId = :sourceId and a.perm = :perm and a.targetId = :targetId and a.type = :type and a.deleteDate is null&quot;);</span>
+<span class="nc" id="L178">        q.setParameter(&quot;sourceId&quot;, sourceId);</span>
+<span class="nc" id="L179">        q.setParameter(&quot;perm&quot;, perm);</span>
+<span class="nc" id="L180">        q.setParameter(&quot;targetId&quot;, targetId);</span>
+<span class="nc" id="L181">        q.setParameter(&quot;type&quot;, type);</span>
+<span class="nc" id="L182">        q.setParameter(&quot;dateNow&quot;, new Date());</span>
+<span class="nc" id="L183">        q.executeUpdate();</span>
+<span class="nc" id="L184">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

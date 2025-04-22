@@ -501,4 +501,9 @@ public class TestUserResource extends BaseJerseyTest {
                 .delete();
         Assert.assertEquals(Response.Status.OK, Response.Status.fromStatusCode(response.getStatus()));
     }
+
+    @Test
+    public void testUserUpdate() throws Exception {
+        clientUtil.createUser("alice");
+    }
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupCriteria.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao.criteria</a> &gt; <span class="el_source">GroupCriteria.java</span></div><h1>GroupCriteria.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao.criteria;
+
+/**
+ * Group criteria.
+ *
+ * @author bgamard 
+ */
+<span class="nc" id="L8">public class GroupCriteria {</span>
+    /**
+     * Search query.
+     */
+    private String search;
+
+    /**
+     * User ID.
+     */
+    private String userId;
+    
+    /**
+     * Retrieve user groups recursively.
+     */
+<span class="nc" id="L22">    private boolean recursive = false;</span>
+    
+    public String getSearch() {
+<span class="nc" id="L25">        return search;</span>
+    }
+
+    public GroupCriteria setSearch(String search) {
+<span class="nc" id="L29">        this.search = search;</span>
+<span class="nc" id="L30">        return this;</span>
+    }
+
+    public String getUserId() {
+<span class="nc" id="L34">        return userId;</span>
+    }
+
+    public GroupCriteria setUserId(String userId) {
+<span class="nc" id="L38">        this.userId = userId;</span>
+<span class="nc" id="L39">        return this;</span>
+    }
+
+    public boolean isRecursive() {
+<span class="nc" id="L43">        return recursive;</span>
+    }
+
+    public GroupCriteria setRecursive(boolean recursive) {
+<span class="nc" id="L47">        this.recursive = recursive;</span>
+<span class="nc" id="L48">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import com.google.common.base.MoreObjects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.Date;
+
+/**
+ * User entity.
+ * 
+ * @author jtremeaux
+ */
+@Entity
+@Table(name = &quot;T_USER&quot;)
+<span class="fc" id="L18">public class User implements Loggable {</span>
+    /**
+     * User ID.
+     */
+    @Id
+    @Column(name = &quot;USE_ID_C&quot;, length = 36)
+    private String id;
+    
+    /**
+     * Role ID.
+     */
+    @Column(name = &quot;USE_IDROLE_C&quot;, nullable = false, length = 36)
+    private String roleId;
+    
+    /**
+     * User's username.
+     */
+    @Column(name = &quot;USE_USERNAME_C&quot;, nullable = false, length = 50)
+    private String username;
+    
+    /**
+     * User's password.
+     */
+    @Column(name = &quot;USE_PASSWORD_C&quot;, nullable = false, length = 100)
+    private String password;
+
+    /**
+     * User's private key.
+     */
+    @Column(name = &quot;USE_PRIVATEKEY_C&quot;, nullable = false, length = 100)
+    private String privateKey;
+
+    /**
+     * False when the user passed the onboarding.
+     */
+    @Column(name = &quot;USE_ONBOARDING_B&quot;, nullable = false)
+    private boolean onboarding;
+
+    /**
+     * TOTP secret key.
+     */
+    @Column(name = &quot;USE_TOTPKEY_C&quot;, length = 100)
+    private String totpKey;
+    
+    /**
+     * Email address.
+     */
+    @Column(name = &quot;USE_EMAIL_C&quot;, nullable = false, length = 100)
+    private String email;
+    
+    /**
+     * Storage quota.
+     */
+    @Column(name = &quot;USE_STORAGEQUOTA_N&quot;, nullable = false)
+    private Long storageQuota;
+    
+    /**
+     * Storage current usage.
+     */
+    @Column(name = &quot;USE_STORAGECURRENT_N&quot;, nullable = false)
+    private Long storageCurrent;
+    
+    /**
+     * Creation date.
+     */
+    @Column(name = &quot;USE_CREATEDATE_D&quot;, nullable = false)
+    private Date createDate;
+    
+    /**
+     * Deletion date.
+     */
+    @Column(name = &quot;USE_DELETEDATE_D&quot;)
+    private Date deleteDate;
+    
+    /**
+     * Disable date.
+     */
+    @Column(name = &quot;USE_DISABLEDATE_D&quot;)
+    private Date disableDate;
+
+    public String getId() {
+<span class="fc" id="L99">        return id;</span>
+    }
+
+    public User setId(String id) {
+<span class="fc" id="L103">        this.id = id;</span>
+<span class="fc" id="L104">        return this;</span>
+    }
+
+    public String getRoleId() {
+<span class="nc" id="L108">        return roleId;</span>
+    }
+
+    public User setRoleId(String roleId) {
+<span class="fc" id="L112">        this.roleId = roleId;</span>
+<span class="fc" id="L113">        return this;</span>
+    }
+
+    public String getUsername() {
+<span class="fc" id="L117">        return username;</span>
+    }
+
+    public User setUsername(String username) {
+<span class="fc" id="L121">        this.username = username;</span>
+<span class="fc" id="L122">        return this;</span>
+    }
+
+    public String getPassword() {
+<span class="fc" id="L126">        return password;</span>
+    }
+
+    public User setPassword(String password) {
+<span class="fc" id="L130">        this.password = password;</span>
+<span class="fc" id="L131">        return this;</span>
+    }
+
+    public String getEmail() {
+<span class="fc" id="L135">        return email;</span>
+    }
+
+    public User setEmail(String email) {
+<span class="fc" id="L139">        this.email = email;</span>
+<span class="fc" id="L140">        return this;</span>
+    }
+
+    public Date getCreateDate() {
+<span class="nc" id="L144">        return createDate;</span>
+    }
+
+    public User setCreateDate(Date createDate) {
+<span class="fc" id="L148">        this.createDate = createDate;</span>
+<span class="fc" id="L149">        return this;</span>
+    }
+
+    @Override
+    public Date getDeleteDate() {
+<span class="nc" id="L154">        return deleteDate;</span>
+    }
+
+    public User setDeleteDate(Date deleteDate) {
+<span class="fc" id="L158">        this.deleteDate = deleteDate;</span>
+<span class="fc" id="L159">        return this;</span>
+    }
+
+    public Date getDisableDate() {
+<span class="fc" id="L163">        return disableDate;</span>
+    }
+
+    public User setDisableDate(Date disableDate) {
+<span class="fc" id="L167">        this.disableDate = disableDate;</span>
+<span class="fc" id="L168">        return this;</span>
+    }
+
+    public String getPrivateKey() {
+<span class="nc" id="L172">        return privateKey;</span>
+    }
+
+    public User setPrivateKey(String privateKey) {
+<span class="fc" id="L176">        this.privateKey = privateKey;</span>
+<span class="fc" id="L177">        return this;</span>
+    }
+
+    public Long getStorageQuota() {
+<span class="fc" id="L181">        return storageQuota;</span>
+    }
+
+    public User setStorageQuota(Long storageQuota) {
+<span class="fc" id="L185">        this.storageQuota = storageQuota;</span>
+<span class="fc" id="L186">        return this;</span>
+    }
+
+    public Long getStorageCurrent() {
+<span class="fc" id="L190">        return storageCurrent;</span>
+    }
+
+    public User setStorageCurrent(Long storageCurrent) {
+<span class="fc" id="L194">        this.storageCurrent = storageCurrent;</span>
+<span class="fc" id="L195">        return this;</span>
+    }
+    
+    public String getTotpKey() {
+<span class="fc" id="L199">        return totpKey;</span>
+    }
+
+    public User setTotpKey(String totpKey) {
+<span class="fc" id="L203">        this.totpKey = totpKey;</span>
+<span class="fc" id="L204">        return this;</span>
+    }
+
+    public boolean isOnboarding() {
+<span class="nc" id="L208">        return onboarding;</span>
+    }
+
+    public User setOnboarding(boolean onboarding) {
+<span class="nc" id="L212">        this.onboarding = onboarding;</span>
+<span class="nc" id="L213">        return this;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L218">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L219">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L220">                .add(&quot;username&quot;, username)</span>
+<span class="nc" id="L221">                .add(&quot;email&quot;, email)</span>
+<span class="nc" id="L222">                .toString();</span>
+    }
+
+    @Override
+    public String toMessage() {
+<span class="fc" id="L227">        return username;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

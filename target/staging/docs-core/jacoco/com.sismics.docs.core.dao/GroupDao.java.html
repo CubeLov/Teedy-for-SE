@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">GroupDao.java</span></div><h1>GroupDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.google.common.base.Joiner;
+import com.sismics.docs.core.constant.AuditLogType;
+import com.sismics.docs.core.dao.criteria.GroupCriteria;
+import com.sismics.docs.core.dao.dto.GroupDto;
+import com.sismics.docs.core.model.jpa.Group;
+import com.sismics.docs.core.model.jpa.UserGroup;
+import com.sismics.docs.core.util.AuditLogUtil;
+import com.sismics.docs.core.util.jpa.QueryParam;
+import com.sismics.docs.core.util.jpa.QueryUtil;
+import com.sismics.docs.core.util.jpa.SortCriteria;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import java.util.*;
+
+/**
+ * Group DAO.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L25">public class GroupDao {</span>
+    /**
+     * Returns a group by name.
+     * 
+     * @param name Name
+     * @return Group
+     */
+    public Group getActiveByName(String name) {
+<span class="nc" id="L33">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L34">        Query q = em.createQuery(&quot;select g from Group g where g.name = :name and g.deleteDate is null&quot;);</span>
+<span class="nc" id="L35">        q.setParameter(&quot;name&quot;, name);</span>
+        try {
+<span class="nc" id="L37">            return (Group) q.getSingleResult();</span>
+<span class="nc" id="L38">        } catch (NoResultException e) {</span>
+<span class="nc" id="L39">            return null;</span>
+        }
+    }
+    
+    /**
+     * Returns a group by ID.
+     * 
+     * @param id Group ID
+     * @return Group
+     */
+    public Group getActiveById(String id) {
+<span class="nc" id="L50">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L51">        Query q = em.createQuery(&quot;select g from Group g where g.id = :id and g.deleteDate is null&quot;);</span>
+<span class="nc" id="L52">        q.setParameter(&quot;id&quot;, id);</span>
+        try {
+<span class="nc" id="L54">            return (Group) q.getSingleResult();</span>
+<span class="nc" id="L55">        } catch (NoResultException e) {</span>
+<span class="nc" id="L56">            return null;</span>
+        }
+    }
+    
+    /**
+     * Creates a new group.
+     * 
+     * @param group Group
+     * @param userId User ID
+     * @return New ID
+     */
+    public String create(Group group, String userId) {
+        // Create the UUID
+<span class="nc" id="L69">        group.setId(UUID.randomUUID().toString());</span>
+        
+        // Create the group
+<span class="nc" id="L72">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L73">        em.persist(group);</span>
+        
+        // Create audit log
+<span class="nc" id="L76">        AuditLogUtil.create(group, AuditLogType.CREATE, userId);</span>
+        
+<span class="nc" id="L78">        return group.getId();</span>
+    }
+    
+    /**
+     * Deletes a group.
+     * 
+     * @param groupId Group ID
+     * @param userId User ID
+     */
+    public void delete(String groupId, String userId) {
+<span class="nc" id="L88">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+            
+        // Get the group
+<span class="nc" id="L91">        Query q = em.createQuery(&quot;select g from Group g where g.id = :id and g.deleteDate is null&quot;);</span>
+<span class="nc" id="L92">        q.setParameter(&quot;id&quot;, groupId);</span>
+<span class="nc" id="L93">        Group groupDb = (Group) q.getSingleResult();</span>
+        
+        // Delete the group
+<span class="nc" id="L96">        Date dateNow = new Date();</span>
+<span class="nc" id="L97">        groupDb.setDeleteDate(dateNow);</span>
+        
+        // Delete linked data
+<span class="nc" id="L100">        q = em.createQuery(&quot;update UserGroup ug set ug.deleteDate = :dateNow where ug.groupId = :groupId and ug.deleteDate is not null&quot;);</span>
+<span class="nc" id="L101">        q.setParameter(&quot;dateNow&quot;, dateNow);</span>
+<span class="nc" id="L102">        q.setParameter(&quot;groupId&quot;, groupId);</span>
+<span class="nc" id="L103">        q.executeUpdate();</span>
+        
+<span class="nc" id="L105">        q = em.createQuery(&quot;update Acl a set a.deleteDate = :dateNow where a.targetId = :groupId and a.deleteDate is null&quot;);</span>
+<span class="nc" id="L106">        q.setParameter(&quot;groupId&quot;, groupDb.getId());</span>
+<span class="nc" id="L107">        q.setParameter(&quot;dateNow&quot;, dateNow);</span>
+<span class="nc" id="L108">        q.executeUpdate();</span>
+
+<span class="nc" id="L110">        q = em.createQuery(&quot;update Group g set g.parentId = null where g.parentId = :groupId and g.deleteDate is null&quot;);</span>
+<span class="nc" id="L111">        q.setParameter(&quot;groupId&quot;, groupDb.getId());</span>
+<span class="nc" id="L112">        q.executeUpdate();</span>
+
+        // Create audit log
+<span class="nc" id="L115">        AuditLogUtil.create(groupDb, AuditLogType.DELETE, userId);</span>
+<span class="nc" id="L116">    }</span>
+    
+    /**
+     * Add an user to a group.
+     * 
+     * @param userGroup User group
+     * @return New ID
+     */
+    public String addMember(UserGroup userGroup) {
+        // Create the UUID
+<span class="nc" id="L126">        userGroup.setId(UUID.randomUUID().toString());</span>
+        
+        // Create the user group
+<span class="nc" id="L129">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L130">        em.persist(userGroup);</span>
+        
+<span class="nc" id="L132">        return userGroup.getId();</span>
+    }
+    
+    /**
+     * Remove an user from a group.
+     * 
+     * @param groupId Group ID
+     * @param userId User ID
+     */
+    public void removeMember(String groupId, String userId) {
+<span class="nc" id="L142">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+            
+        // Get the user group
+<span class="nc" id="L145">        Query q = em.createQuery(&quot;select ug from UserGroup ug where ug.groupId = :groupId and ug.userId = :userId and ug.deleteDate is null&quot;);</span>
+<span class="nc" id="L146">        q.setParameter(&quot;groupId&quot;, groupId);</span>
+<span class="nc" id="L147">        q.setParameter(&quot;userId&quot;, userId);</span>
+<span class="nc" id="L148">        UserGroup userGroupDb = (UserGroup) q.getSingleResult();</span>
+        
+        // Delete the user group
+<span class="nc" id="L151">        Date dateNow = new Date();</span>
+<span class="nc" id="L152">        userGroupDb.setDeleteDate(dateNow);</span>
+<span class="nc" id="L153">    }</span>
+    
+    /**
+     * Returns the list of all groups.
+     * 
+     * @param criteria Search criteria
+     * @param sortCriteria Sort criteria
+     * @return List of groups
+     */
+    public List&lt;GroupDto&gt; findByCriteria(GroupCriteria criteria, SortCriteria sortCriteria) {
+<span class="nc" id="L163">        Map&lt;String, Object&gt; parameterMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L164">        List&lt;String&gt; criteriaList = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc" id="L166">        StringBuilder sb = new StringBuilder(&quot;select g.GRP_ID_C as c0, g.GRP_NAME_C as c1, g.GRP_IDPARENT_C as c2, gp.GRP_NAME_C as c3, g.GRP_IDROLE_C &quot;);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (criteria.getUserId() != null) {</span>
+<span class="nc" id="L168">            sb.append(&quot; , ug.UGP_ID_C &quot;);</span>
+        }
+<span class="nc" id="L170">        sb.append(&quot; from T_GROUP g &quot;);</span>
+<span class="nc" id="L171">        sb.append(&quot; left join T_GROUP gp on g.GRP_IDPARENT_C = gp.GRP_ID_C &quot;);</span>
+        
+        // Add search criterias
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (criteria.getSearch() != null) {</span>
+<span class="nc" id="L175">            criteriaList.add(&quot;lower(g.GRP_NAME_C) like lower(:search)&quot;);</span>
+<span class="nc" id="L176">            parameterMap.put(&quot;search&quot;, &quot;%&quot; + criteria.getSearch() + &quot;%&quot;);</span>
+        }
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (criteria.getUserId() != null) {</span>
+            // Left join and post-filtering for recursive groups
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            sb.append(criteria.isRecursive() ? &quot; left &quot; : &quot;&quot;);</span>
+<span class="nc" id="L181">            sb.append(&quot; join T_USER_GROUP ug on ug.UGP_IDGROUP_C = g.GRP_ID_C and ug.UGP_IDUSER_C = :userId and ug.UGP_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L182">            parameterMap.put(&quot;userId&quot;, criteria.getUserId());</span>
+        }
+        
+<span class="nc" id="L185">        criteriaList.add(&quot;g.GRP_DELETEDATE_D is null&quot;);</span>
+
+<span class="nc" id="L187">        sb.append(&quot; where &quot;);</span>
+<span class="nc" id="L188">        sb.append(Joiner.on(&quot; and &quot;).join(criteriaList));</span>
+
+        // Perform the search
+<span class="nc" id="L191">        QueryParam queryParam = QueryUtil.getSortedQueryParam(new QueryParam(sb.toString(), parameterMap), sortCriteria);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L193">        List&lt;Object[]&gt; l = QueryUtil.getNativeQuery(queryParam).getResultList();</span>
+        
+        // Assemble results
+<span class="nc" id="L196">        List&lt;GroupDto&gt; groupDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L197">        List&lt;GroupDto&gt; userGroupDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L199">            int i = 0;</span>
+<span class="nc" id="L200">            GroupDto groupDto = new GroupDto()</span>
+<span class="nc" id="L201">                .setId((String) o[i++])</span>
+<span class="nc" id="L202">                .setName((String) o[i++])</span>
+<span class="nc" id="L203">                .setParentId((String) o[i++])</span>
+<span class="nc" id="L204">                .setParentName((String) o[i++])</span>
+<span class="nc" id="L205">                .setRoleId((String) o[i++]);</span>
+<span class="nc" id="L206">            groupDtoList.add(groupDto);</span>
+<span class="nc bnc" id="L207" title="All 4 branches missed.">            if (criteria.getUserId() != null &amp;&amp; o[i] != null) {</span>
+<span class="nc" id="L208">                userGroupDtoList.add(groupDto);</span>
+            }
+<span class="nc" id="L210">        }</span>
+        
+        // Post-query filtering for recursive groups
+<span class="nc bnc" id="L213" title="All 4 branches missed.">        if (criteria.getUserId() != null &amp;&amp; criteria.isRecursive()) {</span>
+<span class="nc" id="L214">            Set&lt;GroupDto&gt; filteredGroupDtoSet = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            for (GroupDto userGroupDto : userGroupDtoList) {</span>
+<span class="nc" id="L216">                filteredGroupDtoSet.add(userGroupDto); // Direct group</span>
+<span class="nc" id="L217">                findGroupParentHierarchy(filteredGroupDtoSet, groupDtoList, userGroupDto, 0); // Indirect groups</span>
+<span class="nc" id="L218">            }</span>
+<span class="nc" id="L219">            groupDtoList = new ArrayList&lt;&gt;(filteredGroupDtoSet);</span>
+        }
+        
+<span class="nc" id="L222">        return groupDtoList;</span>
+    }
+    
+    /**
+     * Recursively search group's parents.
+     * 
+     * @param parentGroupDtoSet Resulting parents
+     * @param groupDtoList All groups
+     * @param userGroupDto Reference group to search from
+     * @param depth Depth
+     */
+    private void findGroupParentHierarchy(Set&lt;GroupDto&gt; parentGroupDtoSet, List&lt;GroupDto&gt; groupDtoList, GroupDto userGroupDto, int depth) {
+<span class="nc bnc" id="L234" title="All 4 branches missed.">        if (userGroupDto.getParentId() == null || depth == 10) { // Max depth 10 to avoid infinite loop</span>
+<span class="nc" id="L235">            return;</span>
+        }
+        
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        for (GroupDto groupDto : groupDtoList) {</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (groupDto.getId().equals(userGroupDto.getParentId())) {</span>
+<span class="nc" id="L240">                parentGroupDtoSet.add(groupDto); // Add parent</span>
+<span class="nc" id="L241">                findGroupParentHierarchy(parentGroupDtoSet, groupDtoList, groupDto, depth + 1); // Find parent's parents</span>
+            }
+<span class="nc" id="L243">        }</span>
+<span class="nc" id="L244">    }</span>
+    
+    /**
+     * Update a group.
+     * 
+     * @param group Group to update
+     * @param userId User ID
+     * @return Updated group
+     */
+    public Group update(Group group, String userId) {
+<span class="nc" id="L254">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+        
+        // Get the group
+<span class="nc" id="L257">        Query q = em.createQuery(&quot;select g from Group g where g.id = :id and g.deleteDate is null&quot;);</span>
+<span class="nc" id="L258">        q.setParameter(&quot;id&quot;, group.getId());</span>
+<span class="nc" id="L259">        Group groupDb = (Group) q.getSingleResult();</span>
+        
+        // Update the group
+<span class="nc" id="L262">        groupDb.setName(group.getName());</span>
+<span class="nc" id="L263">        groupDb.setParentId(group.getParentId());</span>
+        
+        // Create audit log
+<span class="nc" id="L266">        AuditLogUtil.create(groupDb, AuditLogType.UPDATE, userId);</span>
+        
+<span class="nc" id="L268">        return groupDb;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TagDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">TagDao.java</span></div><h1>TagDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.google.common.base.Joiner;
+import com.sismics.docs.core.constant.AuditLogType;
+import com.sismics.docs.core.dao.criteria.TagCriteria;
+import com.sismics.docs.core.dao.dto.TagDto;
+import com.sismics.docs.core.model.jpa.DocumentTag;
+import com.sismics.docs.core.model.jpa.Tag;
+import com.sismics.docs.core.util.AuditLogUtil;
+import com.sismics.docs.core.util.SecurityUtil;
+import com.sismics.docs.core.util.jpa.QueryParam;
+import com.sismics.docs.core.util.jpa.QueryUtil;
+import com.sismics.docs.core.util.jpa.SortCriteria;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import java.util.*;
+
+/**
+ * Tag DAO.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L26">public class TagDao {</span>
+    /**
+     * Gets a tag by its ID.
+     * 
+     * @param id Tag ID
+     * @return Tag
+     */
+    public Tag getById(String id) {
+<span class="nc" id="L34">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+        try {
+<span class="nc" id="L36">            return em.find(Tag.class, id);</span>
+<span class="nc" id="L37">        } catch (NoResultException e) {</span>
+<span class="nc" id="L38">            return null;</span>
+        }
+    }
+    
+    /**
+     * Update tags on a document.
+     * 
+     * @param documentId Document ID
+     * @param tagIdSet Set of tag ID
+     */
+    public void updateTagList(String documentId, Set&lt;String&gt; tagIdSet) {
+<span class="nc" id="L49">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+        
+        // Get current tag links
+<span class="nc" id="L52">        Query q = em.createQuery(&quot;select dt from DocumentTag dt where dt.documentId = :documentId and dt.deleteDate is null&quot;);</span>
+<span class="nc" id="L53">        q.setParameter(&quot;documentId&quot;, documentId);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L55">        List&lt;DocumentTag&gt; documentTagList = q.getResultList();</span>
+        
+        // Deleting tags no longer linked
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (DocumentTag documentTag : documentTagList) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (!tagIdSet.contains(documentTag.getTagId())) {</span>
+<span class="nc" id="L60">                documentTag.setDeleteDate(new Date());</span>
+            }
+<span class="nc" id="L62">        }</span>
+        
+        // Adding new tag links
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        for (String tagId : tagIdSet) {</span>
+<span class="nc" id="L66">            boolean found = false;</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            for (DocumentTag documentTag : documentTagList) {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                if (documentTag.getTagId().equals(tagId)) {</span>
+<span class="nc" id="L69">                    found = true;</span>
+<span class="nc" id="L70">                    break;</span>
+                }
+<span class="nc" id="L72">            }</span>
+            
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (!found) {</span>
+<span class="nc" id="L75">                DocumentTag documentTag = new DocumentTag();</span>
+<span class="nc" id="L76">                documentTag.setId(UUID.randomUUID().toString());</span>
+<span class="nc" id="L77">                documentTag.setDocumentId(documentId);</span>
+<span class="nc" id="L78">                documentTag.setTagId(tagId);</span>
+<span class="nc" id="L79">                em.persist(documentTag);</span>
+            }
+<span class="nc" id="L81">        }</span>
+<span class="nc" id="L82">    }</span>
+    
+    /**
+     * Creates a new tag.
+     * 
+     * @param tag Tag
+     * @param userId User ID
+     * @return New ID
+     */
+    public String create(Tag tag, String userId) {
+        // Create the UUID
+<span class="nc" id="L93">        tag.setId(UUID.randomUUID().toString());</span>
+        
+        // Create the tag
+<span class="nc" id="L96">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L97">        tag.setCreateDate(new Date());</span>
+<span class="nc" id="L98">        em.persist(tag);</span>
+        
+        // Create audit log
+<span class="nc" id="L101">        AuditLogUtil.create(tag, AuditLogType.CREATE, userId);</span>
+        
+<span class="nc" id="L103">        return tag.getId();</span>
+    }
+    
+    /**
+     * Deletes a tag.
+     * 
+     * @param tagId Tag ID
+     * @param userId User ID
+     */
+    public void delete(String tagId, String userId) {
+<span class="nc" id="L113">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+            
+        // Get the tag
+<span class="nc" id="L116">        Query q = em.createQuery(&quot;select t from Tag t where t.id = :id and t.deleteDate is null&quot;);</span>
+<span class="nc" id="L117">        q.setParameter(&quot;id&quot;, tagId);</span>
+<span class="nc" id="L118">        Tag tagDb = (Tag) q.getSingleResult();</span>
+        
+        // Delete the tag
+<span class="nc" id="L121">        Date dateNow = new Date();</span>
+<span class="nc" id="L122">        tagDb.setDeleteDate(dateNow);</span>
+
+        // Delete linked data
+<span class="nc" id="L125">        q = em.createQuery(&quot;update DocumentTag dt set dt.deleteDate = :dateNow where dt.tagId = :tagId and dt.deleteDate is not null&quot;);</span>
+<span class="nc" id="L126">        q.setParameter(&quot;dateNow&quot;, dateNow);</span>
+<span class="nc" id="L127">        q.setParameter(&quot;tagId&quot;, tagId);</span>
+<span class="nc" id="L128">        q.executeUpdate();</span>
+
+<span class="nc" id="L130">        q = em.createQuery(&quot;update Acl a set a.deleteDate = :dateNow where a.sourceId = :tagId and a.deleteDate is null&quot;);</span>
+<span class="nc" id="L131">        q.setParameter(&quot;tagId&quot;, tagId);</span>
+<span class="nc" id="L132">        q.setParameter(&quot;dateNow&quot;, dateNow);</span>
+<span class="nc" id="L133">        q.executeUpdate();</span>
+
+<span class="nc" id="L135">        q = em.createQuery(&quot;update Tag t set t.parentId = null where t.parentId = :tagId and t.deleteDate is null&quot;);</span>
+<span class="nc" id="L136">        q.setParameter(&quot;tagId&quot;, tagId);</span>
+<span class="nc" id="L137">        q.executeUpdate();</span>
+        
+        // Create audit log
+<span class="nc" id="L140">        AuditLogUtil.create(tagDb, AuditLogType.DELETE, userId);</span>
+<span class="nc" id="L141">    }</span>
+    
+    /**
+     * Update a tag.
+     * 
+     * @param tag Tag to update
+     * @param userId User ID
+     * @return Updated tag
+     */
+    public Tag update(Tag tag, String userId) {
+<span class="nc" id="L151">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+        
+        // Get the tag
+<span class="nc" id="L154">        Query q = em.createQuery(&quot;select t from Tag t where t.id = :id and t.deleteDate is null&quot;);</span>
+<span class="nc" id="L155">        q.setParameter(&quot;id&quot;, tag.getId());</span>
+<span class="nc" id="L156">        Tag tagDb = (Tag) q.getSingleResult();</span>
+        
+        // Update the tag
+<span class="nc" id="L159">        tagDb.setName(tag.getName());</span>
+<span class="nc" id="L160">        tagDb.setColor(tag.getColor());</span>
+<span class="nc" id="L161">        tagDb.setParentId(tag.getParentId());</span>
+        
+        // Create audit log
+<span class="nc" id="L164">        AuditLogUtil.create(tagDb, AuditLogType.UPDATE, userId);</span>
+        
+<span class="nc" id="L166">        return tagDb;</span>
+    }
+
+    /**
+     * Returns the list of all tags.
+     *
+     * @param criteria Search criteria
+     * @param sortCriteria Sort criteria
+     * @return List of groups
+     */
+    public List&lt;TagDto&gt; findByCriteria(TagCriteria criteria, SortCriteria sortCriteria) {
+<span class="nc" id="L177">        Map&lt;String, Object&gt; parameterMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L178">        List&lt;String&gt; criteriaList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L180">        StringBuilder sb = new StringBuilder(&quot;select distinct t.TAG_ID_C as c0, t.TAG_NAME_C as c1, t.TAG_COLOR_C as c2, t.TAG_IDPARENT_C as c3, u.USE_USERNAME_C as c4 &quot;);</span>
+<span class="nc" id="L181">        sb.append(&quot; from T_TAG t &quot;);</span>
+<span class="nc" id="L182">        sb.append(&quot; join T_USER u on t.TAG_IDUSER_C = u.USE_ID_C &quot;);</span>
+
+        // Add search criterias
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (criteria.getId() != null) {</span>
+<span class="nc" id="L186">            criteriaList.add(&quot;t.TAG_ID_C = :id&quot;);</span>
+<span class="nc" id="L187">            parameterMap.put(&quot;id&quot;, criteria.getId());</span>
+        }
+<span class="nc bnc" id="L189" title="All 4 branches missed.">        if (criteria.getTargetIdList() != null &amp;&amp; !SecurityUtil.skipAclCheck(criteria.getTargetIdList())) {</span>
+<span class="nc" id="L190">            sb.append(&quot; left join T_ACL a on a.ACL_TARGETID_C in (:targetIdList) and a.ACL_SOURCEID_C = t.TAG_ID_C and a.ACL_PERM_C = 'READ' and a.ACL_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L191">            criteriaList.add(&quot;a.ACL_ID_C is not null&quot;);</span>
+<span class="nc" id="L192">            parameterMap.put(&quot;targetIdList&quot;, criteria.getTargetIdList());</span>
+        }
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (criteria.getDocumentId() != null) {</span>
+<span class="nc" id="L195">            sb.append(&quot; join T_DOCUMENT_TAG dt on dt.DOT_IDTAG_C = t.TAG_ID_C and dt.DOT_DELETEDATE_D is null &quot;);</span>
+<span class="nc" id="L196">            criteriaList.add(&quot;dt.DOT_IDDOCUMENT_C = :documentId&quot;);</span>
+<span class="nc" id="L197">            parameterMap.put(&quot;documentId&quot;, criteria.getDocumentId());</span>
+        }
+
+<span class="nc" id="L200">        criteriaList.add(&quot;t.TAG_DELETEDATE_D is null&quot;);</span>
+
+<span class="nc" id="L202">        sb.append(&quot; where &quot;);</span>
+<span class="nc" id="L203">        sb.append(Joiner.on(&quot; and &quot;).join(criteriaList));</span>
+
+        // Perform the search
+<span class="nc" id="L206">        QueryParam queryParam = QueryUtil.getSortedQueryParam(new QueryParam(sb.toString(), parameterMap), sortCriteria);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L208">        List&lt;Object[]&gt; l = QueryUtil.getNativeQuery(queryParam).getResultList();</span>
+
+        // Assemble results
+<span class="nc" id="L211">        List&lt;TagDto&gt; tagDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L213">            int i = 0;</span>
+<span class="nc" id="L214">            TagDto tagDto = new TagDto()</span>
+<span class="nc" id="L215">                    .setId((String) o[i++])</span>
+<span class="nc" id="L216">                    .setName((String) o[i++])</span>
+<span class="nc" id="L217">                    .setColor((String) o[i++])</span>
+<span class="nc" id="L218">                    .setParentId((String) o[i++])</span>
+<span class="nc" id="L219">                    .setCreator((String) o[i]);</span>
+<span class="nc" id="L220">            tagDtoList.add(tagDto);</span>
+<span class="nc" id="L221">        }</span>
+
+<span class="nc" id="L223">        return tagDtoList;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

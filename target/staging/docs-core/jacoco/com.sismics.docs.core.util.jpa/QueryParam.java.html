@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QueryParam.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.jpa</a> &gt; <span class="el_source">QueryParam.java</span></div><h1>QueryParam.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.jpa;
+
+import java.util.Map;
+
+/**
+ * Query parameters.
+ *
+ * @author jtremeaux 
+ */
+public class QueryParam {
+
+    /**
+     * Query string.
+     */
+    private String queryString;
+    
+    /**
+     * Query parameters.
+     */
+    private Map&lt;String, Object&gt; parameterMap;
+
+    /**
+     * Constructor of QueryParam.
+     * 
+     * @param queryString Query string
+     * @param parameterMap Query parameters
+     */
+<span class="nc" id="L28">    public QueryParam(String queryString, Map&lt;String, Object&gt; parameterMap) {</span>
+<span class="nc" id="L29">        this.queryString = queryString;</span>
+<span class="nc" id="L30">        this.parameterMap = parameterMap;</span>
+<span class="nc" id="L31">    }</span>
+
+    /**
+     * Getter of queryString.
+     *
+     * @return queryString
+     */
+    public String getQueryString() {
+<span class="nc" id="L39">        return queryString;</span>
+    }
+
+    /**
+     * Getter of parameterMap.
+     *
+     * @return parameterMap
+     */
+    public Map&lt;String, Object&gt; getParameterMap() {
+<span class="nc" id="L48">        return parameterMap;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PdfPage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.pdf</a> &gt; <span class="el_source">PdfPage.java</span></div><h1>PdfPage.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.pdf;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+
+import java.io.Closeable;
+import java.io.IOException;
+
+/**
+ * Wrapper around PDFBox for high level abstraction of PDF writing.
+ * 
+ * @author bgamard
+ */
+public class PdfPage implements Closeable {
+    private PDPage pdPage;
+    private PDPageContentStream pdContent;
+    private float margin;
+    private PDFont defaultFont;
+    private int defaultFontSize;
+
+    /**
+     * Create a wrapper around a PDF page.
+     * 
+     * @param pdDoc Document
+     * @param pdPage Page
+     * @param margin Margin
+     * @param defaultFont Default font
+     * @param defaultFontSize Default fond size
+     * @throws IOException e
+     */
+<span class="nc" id="L33">    public PdfPage(PDDocument pdDoc, PDPage pdPage, float margin, PDFont defaultFont, int defaultFontSize) throws IOException {</span>
+<span class="nc" id="L34">        this.pdPage = pdPage;</span>
+<span class="nc" id="L35">        this.pdContent = new PDPageContentStream(pdDoc, pdPage);</span>
+<span class="nc" id="L36">        this.margin = margin;</span>
+<span class="nc" id="L37">        this.defaultFont = defaultFont;</span>
+<span class="nc" id="L38">        this.defaultFontSize = defaultFontSize;</span>
+        
+<span class="nc" id="L40">        pdContent.beginText();</span>
+<span class="nc" id="L41">        pdContent.newLineAtOffset(margin, pdPage.getMediaBox().getHeight() - margin);</span>
+<span class="nc" id="L42">    }</span>
+    
+    /**
+     * Write a text with default font.
+     * 
+     * @param text Text
+     * @throws IOException e
+     */
+    public PdfPage addText(String text) throws IOException {
+<span class="nc" id="L51">        drawText(pdPage.getMediaBox().getWidth() - 2 * margin, defaultFont, defaultFontSize, text, false);</span>
+<span class="nc" id="L52">        return this;</span>
+    }
+    
+    /**
+     * Write a text with default font.
+     * 
+     * @param text Text
+     * @param centered If true, the text will be centered in the page
+     * @throws IOException e
+     */
+    public PdfPage addText(String text, boolean centered) throws IOException {
+<span class="nc" id="L63">        drawText(pdPage.getMediaBox().getWidth() - 2 * margin, defaultFont, defaultFontSize, text, centered);</span>
+<span class="nc" id="L64">        return this;</span>
+    }
+    
+    /**
+     * Write a text in the page.
+     * 
+     * @param text Text
+     * @param centered If true, the text will be centered in the page
+     * @param font Font
+     * @param fontSize Font size
+     * @throws IOException e
+     */
+    public PdfPage addText(String text, boolean centered, PDFont font, int fontSize) throws IOException {
+<span class="nc" id="L77">        drawText(pdPage.getMediaBox().getWidth() - 2 * margin, font, fontSize, text, centered);</span>
+<span class="nc" id="L78">        return this;</span>
+    }
+    
+    /**
+     * Create a new line.
+     * 
+     * @throws IOException e
+     */
+    public PdfPage newLine() throws IOException {
+<span class="nc" id="L87">        pdContent.newLineAtOffset(0, - defaultFont.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * defaultFontSize);</span>
+<span class="nc" id="L88">        return this;</span>
+    }
+    
+    /**
+     * Draw a text with low level PDFBox API.
+     * 
+     * @param paragraphWidth Paragraph width
+     * @param font Font
+     * @param fontSize Font size
+     * @param text Text
+     * @param centered If true, the text will be centered in the paragraph
+     * @throws IOException e
+     */
+    private void drawText(float paragraphWidth, PDFont font, int fontSize, String text, boolean centered) throws IOException {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (text == null) {</span>
+<span class="nc" id="L103">            return;</span>
+        }
+
+<span class="nc" id="L106">        pdContent.setFont(font, fontSize);</span>
+<span class="nc" id="L107">        int start = 0;</span>
+<span class="nc" id="L108">        int end = 0;</span>
+<span class="nc" id="L109">        float height = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        for (int i : possibleWrapPoints(text)) {</span>
+<span class="nc" id="L111">            float width = font.getStringWidth(text.substring(start, i)) / 1000 * fontSize;</span>
+<span class="nc bnc" id="L112" title="All 4 branches missed.">            if (start &lt; end &amp;&amp; width &gt; paragraphWidth) {</span>
+                // Draw partial text and increase height
+<span class="nc" id="L114">                pdContent.newLineAtOffset(0, - height);</span>
+<span class="nc" id="L115">                String line = text.substring(start, end);</span>
+<span class="nc" id="L116">                float lineWidth = font.getStringWidth(line) / 1000 * fontSize;</span>
+<span class="nc" id="L117">                float offset = (paragraphWidth - lineWidth) / 2;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                if (centered) pdContent.newLineAtOffset(offset, 0);</span>
+<span class="nc" id="L119">                pdContent.showText(line);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                if (centered) pdContent.newLineAtOffset(- offset, 0);</span>
+<span class="nc" id="L121">                start = end;</span>
+            }
+<span class="nc" id="L123">            end = i;</span>
+        }
+        
+        // Last piece of text
+<span class="nc" id="L127">        String line = text.substring(start);</span>
+<span class="nc" id="L128">        float lineWidth = font.getStringWidth(line) / 1000 * fontSize;</span>
+<span class="nc" id="L129">        float offset = (paragraphWidth - lineWidth) / 2;</span>
+<span class="nc" id="L130">        pdContent.newLineAtOffset(0, - height);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (centered) pdContent.newLineAtOffset(offset, 0);</span>
+<span class="nc" id="L132">        pdContent.showText(line);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (centered) pdContent.newLineAtOffset(- offset, 0);</span>
+<span class="nc" id="L134">    }</span>
+
+    /**
+     * Returns wrap points for a given piece of text.
+     * 
+     * @param text Text
+     * @return Wrap points
+     */
+    private int[] possibleWrapPoints(String text) {
+<span class="nc" id="L143">        String[] split = text.split(&quot;(?&lt;=\\W)&quot;);</span>
+<span class="nc" id="L144">        int[] ret = new int[split.length];</span>
+<span class="nc" id="L145">        ret[0] = split[0].length();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        for (int i = 1 ; i &lt; split.length ; i++) {</span>
+<span class="nc" id="L147">            ret[i] = ret[i-1] + split[i].length();</span>
+        }
+<span class="nc" id="L149">        return ret;</span>
+    }
+
+    @Override
+    public void close() throws IOException {
+<span class="nc" id="L154">        pdContent.endText();</span>
+<span class="nc" id="L155">        pdContent.close();</span>
+<span class="nc" id="L156">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

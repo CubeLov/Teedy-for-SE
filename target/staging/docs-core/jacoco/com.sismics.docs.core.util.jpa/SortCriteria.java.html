@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SortCriteria.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.jpa</a> &gt; <span class="el_source">SortCriteria.java</span></div><h1>SortCriteria.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.jpa;
+
+/**
+ * Sort criteria of a query.
+ *
+ * @author jtremeaux 
+ */
+public class SortCriteria {
+    /**
+     * Index of the column to sort (first is 0).
+     */
+    private int column;
+    
+    /**
+     * Sort in increasing order (or else decreasing).
+     */
+<span class="nc" id="L17">    private boolean asc = true;</span>
+
+    /**
+     * Constructor of sortCriteria.
+     */
+<span class="nc" id="L22">    public SortCriteria(Integer column, Boolean asc) {</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (column != null) {</span>
+<span class="nc" id="L24">            this.column = column;</span>
+        }
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (asc != null) {</span>
+<span class="nc" id="L27">            this.asc = asc;</span>
+        }
+<span class="nc" id="L29">    }</span>
+    
+    /**
+     * Getter of column.
+     *
+     * @return column
+     */
+    public int getColumn() {
+<span class="nc" id="L37">        return column;</span>
+    }
+
+    /**
+     * Getter of asc.
+     *
+     * @return asc
+     */
+    public boolean isAsc() {
+<span class="nc" id="L46">        return asc;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

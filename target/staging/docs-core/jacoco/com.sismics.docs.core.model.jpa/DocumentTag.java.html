@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocumentTag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">DocumentTag.java</span></div><h1>DocumentTag.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import com.google.common.base.MoreObjects;
+
+/**
+ * Link between a document and a tag.
+ * 
+ * @author bgamard
+ */
+@Entity
+@Table(name = &quot;T_DOCUMENT_TAG&quot;)
+<span class="nc" id="L20">public class DocumentTag implements Serializable {</span>
+    /**
+     * Serial version UID.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Document tag ID.
+     */
+    @Id
+    @Column(name = &quot;DOT_ID_C&quot;, length = 36)
+    private String id;
+    
+    /**
+     * Document ID.
+     */
+    @Column(name = &quot;DOT_IDDOCUMENT_C&quot;, nullable = false, length = 36)
+    private String documentId;
+    
+    /**
+     * Tag ID.
+     */
+    @Column(name = &quot;DOT_IDTAG_C&quot;, nullable = false, length = 36)
+    private String tagId;
+
+    /**
+     * Deletion date.
+     */
+    @Column(name = &quot;DOT_DELETEDATE_D&quot;)
+    private Date deleteDate;
+    
+    public String getId() {
+<span class="nc" id="L52">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L56">        this.id = id;</span>
+<span class="nc" id="L57">    }</span>
+    
+    public String getDocumentId() {
+<span class="nc" id="L60">        return documentId;</span>
+    }
+
+    public void setDocumentId(String documentId) {
+<span class="nc" id="L64">        this.documentId = documentId;</span>
+<span class="nc" id="L65">    }</span>
+
+    public String getTagId() {
+<span class="nc" id="L68">        return tagId;</span>
+    }
+
+    public void setTagId(String tagId) {
+<span class="nc" id="L72">        this.tagId = tagId;</span>
+<span class="nc" id="L73">    }</span>
+    
+    public Date getDeleteDate() {
+<span class="nc" id="L76">        return deleteDate;</span>
+    }
+
+    public void setDeleteDate(Date deleteDate) {
+<span class="nc" id="L80">        this.deleteDate = deleteDate;</span>
+<span class="nc" id="L81">    }</span>
+    
+    @Override
+    public String toString() {
+<span class="nc" id="L85">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L86">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L87">                .add(&quot;documentId&quot;, documentId)</span>
+<span class="nc" id="L88">                .add(&quot;tagId&quot;, tagId)</span>
+<span class="nc" id="L89">                .toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

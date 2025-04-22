@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MimeTypeUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.util.mime</a> &gt; <span class="el_source">MimeTypeUtil.java</span></div><h1>MimeTypeUtil.java</h1><pre class="source lang-java linenums">package com.sismics.util.mime;
+
+import java.io.IOException;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Utility to check MIME types.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L13">public class MimeTypeUtil {</span>
+    /**
+     * Try to guess the MIME type of a file.
+     * 
+     * @param file File to inspect
+     * @param name File name
+     * @return MIME type
+     * @throws IOException e
+     */
+    public static String guessMimeType(Path file, String name) throws IOException {
+<span class="nc" id="L23">        String mimeType = Files.probeContentType(file);</span>
+
+<span class="nc bnc" id="L25" title="All 4 branches missed.">        if (mimeType == null &amp;&amp; name != null) {</span>
+<span class="nc" id="L26">            mimeType = URLConnection.getFileNameMap().getContentTypeFor(name);</span>
+        }
+
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (mimeType == null) {</span>
+<span class="nc" id="L30">            return MimeType.DEFAULT;</span>
+        }
+
+<span class="nc" id="L33">        return mimeType;</span>
+    }
+    
+    /**
+     * Get a file extension linked to a MIME type.
+     * 
+     * @param mimeType MIME type
+     * @return File extension
+     */
+    public static String getFileExtension(String mimeType) {
+<span class="nc bnc" id="L43" title="All 12 branches missed.">        switch (mimeType) {</span>
+            case MimeType.APPLICATION_ZIP:
+<span class="nc" id="L45">                return &quot;zip&quot;;</span>
+            case MimeType.IMAGE_GIF:
+<span class="nc" id="L47">                return &quot;gif&quot;;</span>
+            case MimeType.IMAGE_JPEG:
+<span class="nc" id="L49">                return &quot;jpg&quot;;</span>
+            case MimeType.IMAGE_PNG:
+<span class="nc" id="L51">                return &quot;png&quot;;</span>
+            case MimeType.APPLICATION_PDF:
+<span class="nc" id="L53">                return &quot;pdf&quot;;</span>
+            case MimeType.OPEN_DOCUMENT_TEXT:
+<span class="nc" id="L55">                return &quot;odt&quot;;</span>
+            case MimeType.OFFICE_DOCUMENT:
+<span class="nc" id="L57">                return &quot;docx&quot;;</span>
+            case MimeType.TEXT_PLAIN:
+<span class="nc" id="L59">                return &quot;txt&quot;;</span>
+            case MimeType.TEXT_CSV:
+<span class="nc" id="L61">                return &quot;csv&quot;;</span>
+            case MimeType.VIDEO_MP4:
+<span class="nc" id="L63">                return &quot;mp4&quot;;</span>
+            case MimeType.VIDEO_WEBM:
+<span class="nc" id="L65">                return &quot;webm&quot;;</span>
+            default:
+<span class="nc" id="L67">                return &quot;bin&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

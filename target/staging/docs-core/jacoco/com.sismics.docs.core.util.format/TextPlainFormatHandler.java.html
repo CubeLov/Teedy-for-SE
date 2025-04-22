@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextPlainFormatHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util.format</a> &gt; <span class="el_source">TextPlainFormatHandler.java</span></div><h1>TextPlainFormatHandler.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util.format;
+
+import com.google.common.io.Closer;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import com.sismics.docs.core.model.context.AppContext;
+import com.sismics.util.mime.MimeType;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.pdmodel.PDDocument;
+
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Text plain format handler.
+ *
+ * @author bgamard
+ */
+<span class="nc" id="L22">public class TextPlainFormatHandler implements FormatHandler {</span>
+    @Override
+    public boolean accept(String mimeType) {
+<span class="nc bnc" id="L25" title="All 4 branches missed.">        return mimeType.equals(MimeType.TEXT_CSV) || mimeType.equals(MimeType.TEXT_PLAIN);</span>
+    }
+
+    @Override
+    public BufferedImage generateThumbnail(Path file) throws Exception {
+<span class="nc" id="L30">        Document output = new Document(PageSize.A4, 40, 40, 40, 40);</span>
+<span class="nc" id="L31">        Path tempFile = AppContext.getInstance().getFileService().createTemporaryFile();</span>
+<span class="nc" id="L32">        OutputStream pdfOutputStream = Files.newOutputStream(tempFile);</span>
+<span class="nc" id="L33">        PdfWriter.getInstance(output, pdfOutputStream);</span>
+
+<span class="nc" id="L35">        output.open();</span>
+<span class="nc" id="L36">        String content = Files.readString(file, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L37">        Font font = FontFactory.getFont(&quot;LiberationMono-Regular&quot;);</span>
+<span class="nc" id="L38">        Paragraph paragraph = new Paragraph(content, font);</span>
+<span class="nc" id="L39">        paragraph.setAlignment(Element.ALIGN_LEFT);</span>
+<span class="nc" id="L40">        output.add(paragraph);</span>
+<span class="nc" id="L41">        output.close();</span>
+
+        // Use the PDF format handler
+<span class="nc" id="L44">        return new PdfFormatHandler().generateThumbnail(tempFile);</span>
+    }
+
+    @Override
+    public String extractContent(String language, Path file) throws Exception {
+<span class="nc" id="L49">        return Files.readString(file, StandardCharsets.UTF_8);</span>
+    }
+
+    @Override
+    public void appendToPdf(Path file, PDDocument doc, boolean fitImageToPage, int margin, MemoryUsageSetting memUsageSettings, Closer closer) {
+        // TODO Append the text file to the PDF
+<span class="nc" id="L55">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

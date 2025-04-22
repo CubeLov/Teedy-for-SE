@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocsPDType1Font.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">org.apache.pdfbox.pdmodel.font</a> &gt; <span class="el_source">DocsPDType1Font.java</span></div><h1>DocsPDType1Font.java</h1><pre class="source lang-java linenums">package org.apache.pdfbox.pdmodel.font;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.EncodedFont;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.util.BoundingBox;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.encoding.*;
+import org.apache.pdfbox.util.Matrix;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.apache.pdfbox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
+/**
+ * Safe non-crashing font even if no glyph are present.
+ * Will replace unknown glyphs by a space.
+ *
+ * @author bgamard
+ */
+public class DocsPDType1Font extends PDSimpleFont {
+<span class="nc" id="L32">    private static final Log LOG = LogFactory.getLog(DocsPDType1Font.class);</span>
+
+    // alternative names for glyphs which are commonly encountered
+<span class="nc" id="L35">    private static final Map&lt;String, String&gt; ALT_NAMES = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="nc" id="L38">        ALT_NAMES.put(&quot;ff&quot;, &quot;f_f&quot;);</span>
+<span class="nc" id="L39">        ALT_NAMES.put(&quot;ffi&quot;, &quot;f_f_i&quot;);</span>
+<span class="nc" id="L40">        ALT_NAMES.put(&quot;ffl&quot;, &quot;f_f_l&quot;);</span>
+<span class="nc" id="L41">        ALT_NAMES.put(&quot;fi&quot;, &quot;f_i&quot;);</span>
+<span class="nc" id="L42">        ALT_NAMES.put(&quot;fl&quot;, &quot;f_l&quot;);</span>
+<span class="nc" id="L43">        ALT_NAMES.put(&quot;st&quot;, &quot;s_t&quot;);</span>
+<span class="nc" id="L44">        ALT_NAMES.put(&quot;IJ&quot;, &quot;I_J&quot;);</span>
+<span class="nc" id="L45">        ALT_NAMES.put(&quot;ij&quot;, &quot;i_j&quot;);</span>
+<span class="nc" id="L46">        ALT_NAMES.put(&quot;ellipsis&quot;, &quot;elipsis&quot;); // misspelled in ArialMT</span>
+    }
+
+<span class="nc" id="L49">    public static final DocsPDType1Font HELVETICA = new DocsPDType1Font(&quot;Helvetica&quot;);</span>
+<span class="nc" id="L50">    public static final DocsPDType1Font HELVETICA_BOLD = new DocsPDType1Font(&quot;Helvetica-Bold&quot;);</span>
+
+    /**
+     * embedded or system font for rendering.
+     */
+    private final FontBoxFont genericFont;
+
+    private final boolean isEmbedded;
+    private final boolean isDamaged;
+    private Matrix fontMatrix;
+    private final AffineTransform fontMatrixTransform;
+    private BoundingBox fontBBox;
+
+    /**
+     * to improve encoding speed.
+     */
+    private final Map&lt;Integer, byte[]&gt; codeToBytesMap;
+
+    /**
+     * Creates a Type 1 standard 14 font for embedding.
+     *
+     * @param baseFont One of the standard 14 PostScript names
+     */
+    private DocsPDType1Font(String baseFont) {
+<span class="nc" id="L74">        super(baseFont);</span>
+
+<span class="nc" id="L76">        dict.setItem(COSName.SUBTYPE, COSName.TYPE1);</span>
+<span class="nc" id="L77">        dict.setName(COSName.BASE_FONT, baseFont);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (&quot;ZapfDingbats&quot;.equals(baseFont)) {</span>
+<span class="nc" id="L79">            encoding = ZapfDingbatsEncoding.INSTANCE;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        } else if (&quot;Symbol&quot;.equals(baseFont)) {</span>
+<span class="nc" id="L81">            encoding = SymbolEncoding.INSTANCE;</span>
+        } else {
+<span class="nc" id="L83">            encoding = WinAnsiEncoding.INSTANCE;</span>
+<span class="nc" id="L84">            dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);</span>
+        }
+
+        // standard 14 fonts may be accessed concurrently, as they are singletons
+<span class="nc" id="L88">        codeToBytesMap = new ConcurrentHashMap&lt;&gt;();</span>
+
+<span class="nc" id="L90">        FontMapping&lt;FontBoxFont&gt; mapping = FontMappers.instance()</span>
+<span class="nc" id="L91">                .getFontBoxFont(getBaseFont(),</span>
+<span class="nc" id="L92">                        getFontDescriptor());</span>
+<span class="nc" id="L93">        genericFont = mapping.getFont();</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (mapping.isFallback()) {</span>
+            String fontName;
+            try {
+<span class="nc" id="L98">                fontName = genericFont.getName();</span>
+<span class="nc" id="L99">            } catch (IOException e) {</span>
+<span class="nc" id="L100">                fontName = &quot;?&quot;;</span>
+<span class="nc" id="L101">            }</span>
+<span class="nc" id="L102">            LOG.warn(&quot;Using fallback font &quot; + fontName + &quot; for base font &quot; + getBaseFont());</span>
+        }
+<span class="nc" id="L104">        isEmbedded = false;</span>
+<span class="nc" id="L105">        isDamaged = false;</span>
+<span class="nc" id="L106">        fontMatrixTransform = new AffineTransform();</span>
+<span class="nc" id="L107">    }</span>
+
+    /**
+     * Returns the PostScript name of the font.
+     */
+    private String getBaseFont() {
+<span class="nc" id="L113">        return dict.getNameAsString(COSName.BASE_FONT);</span>
+    }
+
+    @Override
+    public float getHeight(int code) throws IOException {
+<span class="nc" id="L118">        String name = codeToName(code);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (getStandard14AFM() != null) {</span>
+<span class="nc" id="L120">            String afmName = getEncoding().getName(code);</span>
+<span class="nc" id="L121">            return getStandard14AFM().getCharacterHeight(afmName);</span>
+        } else {
+<span class="nc" id="L123">            return (float) genericFont.getPath(name).getBounds().getHeight();</span>
+        }
+    }
+
+    @Override
+    protected byte[] encode(int unicode) throws IOException {
+<span class="nc" id="L129">        byte[] bytes = codeToBytesMap.get(unicode);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (bytes != null) {</span>
+<span class="nc" id="L131">            return bytes;</span>
+        }
+
+<span class="nc" id="L134">        String name = getGlyphList().codePointToName(unicode);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (isStandard14()) {</span>
+            // genericFont not needed, thus simplified code
+            // this is important on systems with no installed fonts
+<span class="nc bnc" id="L138" title="All 2 branches missed.">            if (!encoding.contains(name)) {</span>
+<span class="nc" id="L139">                return &quot; &quot;.getBytes();</span>
+            }
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (&quot;.notdef&quot;.equals(name)) {</span>
+<span class="nc" id="L142">                return &quot; &quot;.getBytes();</span>
+            }
+        } else {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            if (!encoding.contains(name)) {</span>
+<span class="nc" id="L146">                return &quot; &quot;.getBytes();</span>
+            }
+
+<span class="nc" id="L149">            String nameInFont = getNameInFont(name);</span>
+
+<span class="nc bnc" id="L151" title="All 4 branches missed.">            if (nameInFont.equals(&quot;.notdef&quot;) || !genericFont.hasGlyph(nameInFont)) {</span>
+<span class="nc" id="L152">                return &quot; &quot;.getBytes();</span>
+            }
+        }
+
+<span class="nc" id="L156">        Map&lt;String, Integer&gt; inverted = encoding.getNameToCodeMap();</span>
+<span class="nc" id="L157">        int code = inverted.get(name);</span>
+<span class="nc" id="L158">        bytes = new byte[]{(byte) code};</span>
+<span class="nc" id="L159">        codeToBytesMap.put(code, bytes);</span>
+<span class="nc" id="L160">        return bytes;</span>
+    }
+
+    @Override
+    public float getWidthFromFont(int code) throws IOException {
+<span class="nc" id="L165">        String name = codeToName(code);</span>
+
+        // width of .notdef is ignored for substitutes, see PDFBOX-1900
+<span class="nc bnc" id="L168" title="All 4 branches missed.">        if (!isEmbedded &amp;&amp; &quot;.notdef&quot;.equals(name)) {</span>
+<span class="nc" id="L169">            return 250;</span>
+        }
+<span class="nc" id="L171">        float width = genericFont.getWidth(name);</span>
+
+<span class="nc" id="L173">        Point2D p = new Point2D.Float(width, 0);</span>
+<span class="nc" id="L174">        fontMatrixTransform.transform(p, p);</span>
+<span class="nc" id="L175">        return (float) p.getX();</span>
+    }
+
+    @Override
+    public boolean isEmbedded() {
+<span class="nc" id="L180">        return isEmbedded;</span>
+    }
+
+    @Override
+    public float getAverageFontWidth() {
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (getStandard14AFM() != null) {</span>
+<span class="nc" id="L186">            return getStandard14AFM().getAverageCharacterWidth();</span>
+        } else {
+<span class="nc" id="L188">            return super.getAverageFontWidth();</span>
+        }
+    }
+
+    @Override
+    public int readCode(InputStream in) throws IOException {
+<span class="nc" id="L194">        return in.read();</span>
+    }
+
+    @Override
+    protected Encoding readEncodingFromFont() throws IOException {
+<span class="nc bnc" id="L199" title="All 4 branches missed.">        if (!isEmbedded() &amp;&amp; getStandard14AFM() != null) {</span>
+            // read from AFM
+<span class="nc" id="L201">            return new Type1Encoding(getStandard14AFM());</span>
+        } else {
+            // extract from Type1 font/substitute
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            if (genericFont instanceof EncodedFont) {</span>
+<span class="nc" id="L205">                return Type1Encoding.fromFontBox(((EncodedFont) genericFont).getEncoding());</span>
+            } else {
+                // default (only happens with TTFs)
+<span class="nc" id="L208">                return StandardEncoding.INSTANCE;</span>
+            }
+        }
+    }
+
+    @Override
+    public FontBoxFont getFontBoxFont() {
+<span class="nc" id="L215">        return genericFont;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L220">        return getBaseFont();</span>
+    }
+
+    @Override
+    public BoundingBox getBoundingBox() throws IOException {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (fontBBox == null) {</span>
+<span class="nc" id="L226">            fontBBox = generateBoundingBox();</span>
+        }
+<span class="nc" id="L228">        return fontBBox;</span>
+    }
+
+    private BoundingBox generateBoundingBox() throws IOException {
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (getFontDescriptor() != null) {</span>
+<span class="nc" id="L233">            PDRectangle bbox = getFontDescriptor().getFontBoundingBox();</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">            if (bbox != null &amp;&amp;</span>
+<span class="nc bnc" id="L235" title="All 4 branches missed.">                    (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 ||</span>
+<span class="nc bnc" id="L236" title="All 4 branches missed.">                            bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)) {</span>
+<span class="nc" id="L237">                return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),</span>
+<span class="nc" id="L238">                        bbox.getUpperRightX(), bbox.getUpperRightY());</span>
+            }
+        }
+<span class="nc" id="L241">        return genericFont.getFontBBox();</span>
+    }
+
+    private String codeToName(int code) throws IOException {
+<span class="nc" id="L245">        String name = getEncoding().getName(code);</span>
+<span class="nc" id="L246">        return getNameInFont(name);</span>
+    }
+
+    /**
+     * Maps a PostScript glyph name to the name in the underlying font, for example when
+     * using a TTF font we might map &quot;W&quot; to &quot;uni0057&quot;.
+     */
+    private String getNameInFont(String name) throws IOException {
+<span class="nc bnc" id="L254" title="All 4 branches missed.">        if (isEmbedded() || genericFont.hasGlyph(name)) {</span>
+<span class="nc" id="L255">            return name;</span>
+        } else {
+            // try alternative name
+<span class="nc" id="L258">            String altName = ALT_NAMES.get(name);</span>
+<span class="nc bnc" id="L259" title="All 6 branches missed.">            if (altName != null &amp;&amp; !name.equals(&quot;.notdef&quot;) &amp;&amp; genericFont.hasGlyph(altName)) {</span>
+<span class="nc" id="L260">                return altName;</span>
+            } else {
+                // try unicode name
+<span class="nc" id="L263">                String unicodes = getGlyphList().toUnicode(name);</span>
+<span class="nc bnc" id="L264" title="All 4 branches missed.">                if (unicodes != null &amp;&amp; unicodes.length() == 1) {</span>
+<span class="nc" id="L265">                    String uniName = getUniNameOfCodePoint(unicodes.codePointAt(0));</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                    if (genericFont.hasGlyph(uniName)) {</span>
+<span class="nc" id="L267">                        return uniName;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L272">        return &quot;.notdef&quot;;</span>
+    }
+
+    @Override
+    public GeneralPath getPath(String name) throws IOException {
+        // Acrobat does not draw .notdef for Type 1 fonts, see PDFBOX-2421
+        // I suspect that it does do this for embedded fonts though, but this is untested
+<span class="nc bnc" id="L279" title="All 4 branches missed.">        if (name.equals(&quot;.notdef&quot;) &amp;&amp; !isEmbedded) {</span>
+<span class="nc" id="L280">            return new GeneralPath();</span>
+        } else {
+<span class="nc" id="L282">            return genericFont.getPath(getNameInFont(name));</span>
+        }
+    }
+
+    @Override
+    public boolean hasGlyph(String name) throws IOException {
+<span class="nc" id="L288">        return genericFont.hasGlyph(getNameInFont(name));</span>
+    }
+
+    @Override
+    public final Matrix getFontMatrix() {
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (fontMatrix == null) {</span>
+            // PDF specified that Type 1 fonts use a 1000upem matrix, but some fonts specify
+            // their own custom matrix anyway, for example PDFBOX-2298
+<span class="nc" id="L296">            List&lt;Number&gt; numbers = null;</span>
+            try {
+<span class="nc" id="L298">                numbers = genericFont.getFontMatrix();</span>
+<span class="nc" id="L299">            } catch (IOException e) {</span>
+<span class="nc" id="L300">                fontMatrix = DEFAULT_FONT_MATRIX;</span>
+<span class="nc" id="L301">            }</span>
+
+<span class="nc bnc" id="L303" title="All 4 branches missed.">            if (numbers != null &amp;&amp; numbers.size() == 6) {</span>
+<span class="nc" id="L304">                fontMatrix = new Matrix(</span>
+<span class="nc" id="L305">                        numbers.get(0).floatValue(), numbers.get(1).floatValue(),</span>
+<span class="nc" id="L306">                        numbers.get(2).floatValue(), numbers.get(3).floatValue(),</span>
+<span class="nc" id="L307">                        numbers.get(4).floatValue(), numbers.get(5).floatValue());</span>
+            } else {
+<span class="nc" id="L309">                return super.getFontMatrix();</span>
+            }
+        }
+<span class="nc" id="L312">        return fontMatrix;</span>
+    }
+
+    @Override
+    public boolean isDamaged() {
+<span class="nc" id="L317">        return isDamaged;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

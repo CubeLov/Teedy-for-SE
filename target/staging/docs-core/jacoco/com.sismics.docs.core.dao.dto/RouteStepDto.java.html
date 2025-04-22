@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RouteStepDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao.dto</a> &gt; <span class="el_source">RouteStepDto.java</span></div><h1>RouteStepDto.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao.dto;
+
+import com.sismics.docs.core.constant.RouteStepType;
+import com.sismics.util.JsonUtil;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
+
+/**
+ * Route step DTO.
+ *
+ * @author bgamard 
+ */
+<span class="nc" id="L14">public class RouteStepDto {</span>
+    /**
+     * Route step ID.
+     */
+    private String id;
+
+    /**
+     * Name.
+     */
+    private String name;
+
+    /**
+     * Type.
+     */
+    private RouteStepType type;
+
+    /**
+     * Transition.
+     */
+    private String transition;
+
+    /**
+     * Comment.
+     */
+    private String comment;
+
+    /**
+     * Target ID (user or group).
+     */
+    private String targetId;
+
+    /**
+     * Target name.
+     */
+    private String targetName;
+
+    /**
+     * Target type.
+     */
+    private String targetType;
+
+    /**
+     * End date.
+     */
+    private Long endDateTimestamp;
+
+    /**
+     * Validator's username.
+     */
+    private String validatorUserName;
+
+    /**
+     * Transitions data.
+     */
+    private String transitions;
+
+    /**
+     * Route ID.
+     */
+    private String routeId;
+
+    public String getId() {
+<span class="nc" id="L76">        return id;</span>
+    }
+
+    public RouteStepDto setId(String id) {
+<span class="nc" id="L80">        this.id = id;</span>
+<span class="nc" id="L81">        return this;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L85">        return name;</span>
+    }
+
+    public RouteStepDto setName(String name) {
+<span class="nc" id="L89">        this.name = name;</span>
+<span class="nc" id="L90">        return this;</span>
+    }
+
+    public RouteStepType getType() {
+<span class="nc" id="L94">        return type;</span>
+    }
+
+    public RouteStepDto setType(RouteStepType type) {
+<span class="nc" id="L98">        this.type = type;</span>
+<span class="nc" id="L99">        return this;</span>
+    }
+
+    public String getTransition() {
+<span class="nc" id="L103">        return transition;</span>
+    }
+
+    public RouteStepDto setTransition(String transition) {
+<span class="nc" id="L107">        this.transition = transition;</span>
+<span class="nc" id="L108">        return this;</span>
+    }
+
+    public String getComment() {
+<span class="nc" id="L112">        return comment;</span>
+    }
+
+    public RouteStepDto setComment(String comment) {
+<span class="nc" id="L116">        this.comment = comment;</span>
+<span class="nc" id="L117">        return this;</span>
+    }
+
+    public String getTargetId() {
+<span class="nc" id="L121">        return targetId;</span>
+    }
+
+    public RouteStepDto setTargetId(String targetId) {
+<span class="nc" id="L125">        this.targetId = targetId;</span>
+<span class="nc" id="L126">        return this;</span>
+    }
+
+    public String getTargetName() {
+<span class="nc" id="L130">        return targetName;</span>
+    }
+
+    public RouteStepDto setTargetName(String targetName) {
+<span class="nc" id="L134">        this.targetName = targetName;</span>
+<span class="nc" id="L135">        return this;</span>
+    }
+
+    public String getTargetType() {
+<span class="nc" id="L139">        return targetType;</span>
+    }
+
+    public RouteStepDto setTargetType(String targetType) {
+<span class="nc" id="L143">        this.targetType = targetType;</span>
+<span class="nc" id="L144">        return this;</span>
+    }
+
+    public Long getEndDateTimestamp() {
+<span class="nc" id="L148">        return endDateTimestamp;</span>
+    }
+
+    public RouteStepDto setEndDateTimestamp(Long endDateTimestamp) {
+<span class="nc" id="L152">        this.endDateTimestamp = endDateTimestamp;</span>
+<span class="nc" id="L153">        return this;</span>
+    }
+
+    public String getValidatorUserName() {
+<span class="nc" id="L157">        return validatorUserName;</span>
+    }
+
+    public RouteStepDto setValidatorUserName(String validatorUserName) {
+<span class="nc" id="L161">        this.validatorUserName = validatorUserName;</span>
+<span class="nc" id="L162">        return this;</span>
+    }
+
+    public String getRouteId() {
+<span class="nc" id="L166">        return routeId;</span>
+    }
+
+    public RouteStepDto setRouteId(String routeId) {
+<span class="nc" id="L170">        this.routeId = routeId;</span>
+<span class="nc" id="L171">        return this;</span>
+    }
+
+    public String getTransitions() {
+<span class="nc" id="L175">        return transitions;</span>
+    }
+
+    public RouteStepDto setTransitions(String transitions) {
+<span class="nc" id="L179">        this.transitions = transitions;</span>
+<span class="nc" id="L180">        return this;</span>
+    }
+
+    /**
+     * Transform in JSON.
+     *
+     * @return JSON object builder
+     */
+    public JsonObjectBuilder toJson() {
+<span class="nc" id="L189">        return Json.createObjectBuilder()</span>
+<span class="nc" id="L190">                .add(&quot;name&quot;, getName())</span>
+<span class="nc" id="L191">                .add(&quot;type&quot;, getType().name())</span>
+<span class="nc" id="L192">                .add(&quot;comment&quot;, JsonUtil.nullable(getComment()))</span>
+<span class="nc" id="L193">                .add(&quot;end_date&quot;, JsonUtil.nullable(getEndDateTimestamp()))</span>
+<span class="nc" id="L194">                .add(&quot;validator_username&quot;, JsonUtil.nullable(getValidatorUserName()))</span>
+<span class="nc" id="L195">                .add(&quot;target&quot;, Json.createObjectBuilder()</span>
+<span class="nc" id="L196">                        .add(&quot;id&quot;, getTargetId())</span>
+<span class="nc" id="L197">                        .add(&quot;name&quot;, JsonUtil.nullable(getTargetName()))</span>
+<span class="nc" id="L198">                        .add(&quot;type&quot;, getTargetType()))</span>
+<span class="nc" id="L199">                .add(&quot;transition&quot;, JsonUtil.nullable(getTransition()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

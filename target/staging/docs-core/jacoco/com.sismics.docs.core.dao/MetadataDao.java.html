@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetadataDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">MetadataDao.java</span></div><h1>MetadataDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.google.common.base.Joiner;
+import com.sismics.docs.core.constant.AuditLogType;
+import com.sismics.docs.core.constant.MetadataType;
+import com.sismics.docs.core.dao.criteria.MetadataCriteria;
+import com.sismics.docs.core.dao.dto.MetadataDto;
+import com.sismics.docs.core.model.jpa.Metadata;
+import com.sismics.docs.core.util.AuditLogUtil;
+import com.sismics.docs.core.util.jpa.QueryParam;
+import com.sismics.docs.core.util.jpa.QueryUtil;
+import com.sismics.docs.core.util.jpa.SortCriteria;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import java.util.*;
+
+/**
+ * Metadata DAO.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L25">public class MetadataDao {</span>
+    /**
+     * Creates a new metdata.
+     *
+     * @param metadata Metadata
+     * @param userId User ID
+     * @return New ID
+     */
+    public String create(Metadata metadata, String userId) {
+        // Create the UUID
+<span class="nc" id="L35">        metadata.setId(UUID.randomUUID().toString());</span>
+
+        // Create the metadata
+<span class="nc" id="L38">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L39">        em.persist(metadata);</span>
+
+        // Create audit log
+<span class="nc" id="L42">        AuditLogUtil.create(metadata, AuditLogType.CREATE, userId);</span>
+
+<span class="nc" id="L44">        return metadata.getId();</span>
+    }
+
+    /**
+     * Update a metadata.
+     *
+     * @param metadata Metadata to update
+     * @param userId User ID
+     * @return Updated metadata
+     */
+    public Metadata update(Metadata metadata, String userId) {
+<span class="nc" id="L55">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+
+        // Get the metadata
+<span class="nc" id="L58">        Query q = em.createQuery(&quot;select r from Metadata r where r.id = :id and r.deleteDate is null&quot;);</span>
+<span class="nc" id="L59">        q.setParameter(&quot;id&quot;, metadata.getId());</span>
+<span class="nc" id="L60">        Metadata metadataDb = (Metadata) q.getSingleResult();</span>
+
+        // Update the metadata
+<span class="nc" id="L63">        metadataDb.setName(metadata.getName());</span>
+
+        // Create audit log
+<span class="nc" id="L66">        AuditLogUtil.create(metadataDb, AuditLogType.UPDATE, userId);</span>
+
+<span class="nc" id="L68">        return metadataDb;</span>
+    }
+
+    /**
+     * Gets an active metadata by its ID.
+     *
+     * @param id Metadata ID
+     * @return Metadata
+     */
+    public Metadata getActiveById(String id) {
+<span class="nc" id="L78">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+        try {
+<span class="nc" id="L80">            Query q = em.createQuery(&quot;select r from Metadata r where r.id = :id and r.deleteDate is null&quot;);</span>
+<span class="nc" id="L81">            q.setParameter(&quot;id&quot;, id);</span>
+<span class="nc" id="L82">            return (Metadata) q.getSingleResult();</span>
+<span class="nc" id="L83">        } catch (NoResultException e) {</span>
+<span class="nc" id="L84">            return null;</span>
+        }
+    }
+
+    /**
+     * Deletes a metadata.
+     *
+     * @param id Metadata ID
+     * @param userId User ID
+     */
+    public void delete(String id, String userId) {
+<span class="nc" id="L95">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+
+        // Get the metadata
+<span class="nc" id="L98">        Query q = em.createQuery(&quot;select r from Metadata r where r.id = :id and r.deleteDate is null&quot;);</span>
+<span class="nc" id="L99">        q.setParameter(&quot;id&quot;, id);</span>
+<span class="nc" id="L100">        Metadata metadataDb = (Metadata) q.getSingleResult();</span>
+
+        // Delete the metadata
+<span class="nc" id="L103">        Date dateNow = new Date();</span>
+<span class="nc" id="L104">        metadataDb.setDeleteDate(dateNow);</span>
+
+        // Create audit log
+<span class="nc" id="L107">        AuditLogUtil.create(metadataDb, AuditLogType.DELETE, userId);</span>
+<span class="nc" id="L108">    }</span>
+
+    /**
+     * Returns the list of all metadata.
+     *
+     * @param criteria Search criteria
+     * @param sortCriteria Sort criteria
+     * @return List of metadata
+     */
+    public List&lt;MetadataDto&gt; findByCriteria(MetadataCriteria criteria, SortCriteria sortCriteria) {
+<span class="nc" id="L118">        Map&lt;String, Object&gt; parameterMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L119">        List&lt;String&gt; criteriaList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L121">        StringBuilder sb = new StringBuilder(&quot;select m.MET_ID_C c0, m.MET_NAME_C c1, m.MET_TYPE_C c2&quot;);</span>
+<span class="nc" id="L122">        sb.append(&quot; from T_METADATA m &quot;);</span>
+
+<span class="nc" id="L124">        criteriaList.add(&quot;m.MET_DELETEDATE_D is null&quot;);</span>
+
+<span class="nc" id="L126">        sb.append(&quot; where &quot;);</span>
+<span class="nc" id="L127">        sb.append(Joiner.on(&quot; and &quot;).join(criteriaList));</span>
+
+        // Perform the search
+<span class="nc" id="L130">        QueryParam queryParam = QueryUtil.getSortedQueryParam(new QueryParam(sb.toString(), parameterMap), sortCriteria);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L132">        List&lt;Object[]&gt; l = QueryUtil.getNativeQuery(queryParam).getResultList();</span>
+
+        // Assemble results
+<span class="nc" id="L135">        List&lt;MetadataDto&gt; dtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L137">            int i = 0;</span>
+<span class="nc" id="L138">            MetadataDto dto = new MetadataDto();</span>
+<span class="nc" id="L139">            dto.setId((String) o[i++]);</span>
+<span class="nc" id="L140">            dto.setName((String) o[i++]);</span>
+<span class="nc" id="L141">            dto.setType(MetadataType.valueOf((String) o[i]));</span>
+<span class="nc" id="L142">            dtoList.add(dto);</span>
+<span class="nc" id="L143">        }</span>
+<span class="nc" id="L144">        return dtoList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

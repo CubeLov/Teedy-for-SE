@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.util</a> &gt; <span class="el_source">FileUtil.java</span></div><h1>FileUtil.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.util;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.io.CharStreams;
+import com.sismics.docs.core.constant.Constants;
+import com.sismics.docs.core.dao.FileDao;
+import com.sismics.docs.core.dao.UserDao;
+import com.sismics.docs.core.event.DocumentUpdatedAsyncEvent;
+import com.sismics.docs.core.event.FileCreatedAsyncEvent;
+import com.sismics.docs.core.model.context.AppContext;
+import com.sismics.docs.core.model.jpa.File;
+import com.sismics.docs.core.model.jpa.User;
+import com.sismics.util.ImageDeskew;
+import com.sismics.util.Scalr;
+import com.sismics.util.context.ThreadLocalContext;
+import com.sismics.util.io.InputStreamReaderThread;
+import com.sismics.util.mime.MimeTypeUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+
+/**
+ * File entity utilities.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L43">public class FileUtil {</span>
+    /**
+     * Logger.
+     */
+<span class="nc" id="L47">    private static final Logger log = LoggerFactory.getLogger(FileUtil.class);</span>
+
+    /**
+     * File ID of files currently being processed.
+     */
+<span class="nc" id="L52">    private static final Set&lt;String&gt; processingFileSet = Collections.synchronizedSet(new HashSet&lt;&gt;());</span>
+    
+    /**
+     * Optical character recognition on an image.
+     *
+     * @param language Language to OCR
+     * @param image Buffered image
+     * @return Content extracted
+     * @throws Exception e
+     */
+    public static String ocrFile(String language, BufferedImage image) throws Exception {
+        // Upscale, grayscale and deskew the image
+<span class="nc" id="L64">        BufferedImage resizedImage = Scalr.resize(image, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, 3500, Scalr.OP_ANTIALIAS, Scalr.OP_GRAYSCALE);</span>
+<span class="nc" id="L65">        image.flush();</span>
+<span class="nc" id="L66">        ImageDeskew imageDeskew = new ImageDeskew(resizedImage);</span>
+<span class="nc" id="L67">        BufferedImage deskewedImage = Scalr.rotate(resizedImage, - imageDeskew.getSkewAngle(), Scalr.OP_ANTIALIAS, Scalr.OP_GRAYSCALE);</span>
+<span class="nc" id="L68">        resizedImage.flush();</span>
+<span class="nc" id="L69">        Path tmpFile = AppContext.getInstance().getFileService().createTemporaryFile();</span>
+<span class="nc" id="L70">        ImageIO.write(deskewedImage, &quot;tiff&quot;, tmpFile.toFile());</span>
+
+<span class="nc" id="L72">        List&lt;String&gt; result = Lists.newLinkedList(Arrays.asList(&quot;tesseract&quot;, tmpFile.toAbsolutePath().toString(), &quot;stdout&quot;, &quot;-l&quot;, language));</span>
+<span class="nc" id="L73">        ProcessBuilder pb = new ProcessBuilder(result);</span>
+<span class="nc" id="L74">        Process process = pb.start();</span>
+
+        // Consume the process error stream
+<span class="nc" id="L77">        final String commandName = pb.command().get(0);</span>
+<span class="nc" id="L78">        new InputStreamReaderThread(process.getErrorStream(), commandName).start();</span>
+
+        // Consume the data as text
+<span class="nc" id="L81">        try (InputStream is = process.getInputStream()) {</span>
+<span class="nc" id="L82">            return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));</span>
+        }
+    }
+
+    /**
+     * Remove a file from the storage filesystem.
+     * 
+     * @param fileId ID of file to delete
+     */
+    public static void delete(String fileId) throws IOException {
+<span class="nc" id="L92">        Path storedFile = DirectoryUtil.getStorageDirectory().resolve(fileId);</span>
+<span class="nc" id="L93">        Path webFile = DirectoryUtil.getStorageDirectory().resolve(fileId + &quot;_web&quot;);</span>
+<span class="nc" id="L94">        Path thumbnailFile = DirectoryUtil.getStorageDirectory().resolve(fileId + &quot;_thumb&quot;);</span>
+        
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (Files.exists(storedFile)) {</span>
+<span class="nc" id="L97">            Files.delete(storedFile);</span>
+        }
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (Files.exists(webFile)) {</span>
+<span class="nc" id="L100">            Files.delete(webFile);</span>
+        }
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (Files.exists(thumbnailFile)) {</span>
+<span class="nc" id="L103">            Files.delete(thumbnailFile);</span>
+        }
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Create a new file.
+     *
+     * @param name File name, can be null
+     * @param previousFileId ID of the previous version of the file, if the new file is a new version
+     * @param unencryptedFile Path to the unencrypted file
+     * @param fileSize File size
+     * @param language File language, can be null if associated to no document
+     * @param userId User ID creating the file
+     * @param documentId Associated document ID or null if no document
+     * @return File ID
+     * @throws Exception e
+     */
+    public static String createFile(String name, String previousFileId, Path unencryptedFile, long fileSize, String language, String userId, String documentId) throws Exception {
+        // Validate mime type
+        String mimeType;
+        try {
+<span class="nc" id="L124">            mimeType = MimeTypeUtil.guessMimeType(unencryptedFile, name);</span>
+<span class="nc" id="L125">        } catch (IOException e) {</span>
+<span class="nc" id="L126">            throw new IOException(&quot;ErrorGuessMime&quot;, e);</span>
+<span class="nc" id="L127">        }</span>
+
+        // Validate user quota
+<span class="nc" id="L130">        UserDao userDao = new UserDao();</span>
+<span class="nc" id="L131">        User user = userDao.getById(userId);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (user.getStorageCurrent() + fileSize &gt; user.getStorageQuota()) {</span>
+<span class="nc" id="L133">            throw new IOException(&quot;QuotaReached&quot;);</span>
+        }
+
+        // Validate global quota
+<span class="nc" id="L137">        String globalStorageQuotaStr = System.getenv(Constants.GLOBAL_QUOTA_ENV);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (!Strings.isNullOrEmpty(globalStorageQuotaStr)) {</span>
+<span class="nc" id="L139">            long globalStorageQuota = Long.parseLong(globalStorageQuotaStr);</span>
+<span class="nc" id="L140">            long globalStorageCurrent = userDao.getGlobalStorageCurrent();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (globalStorageCurrent + fileSize &gt; globalStorageQuota) {</span>
+<span class="nc" id="L142">                throw new IOException(&quot;QuotaReached&quot;);</span>
+            }
+        }
+
+        // Prepare the file
+<span class="nc" id="L147">        File file = new File();</span>
+<span class="nc" id="L148">        file.setOrder(0);</span>
+<span class="nc" id="L149">        file.setVersion(0);</span>
+<span class="nc" id="L150">        file.setLatestVersion(true);</span>
+<span class="nc" id="L151">        file.setDocumentId(documentId);</span>
+<span class="nc" id="L152">        file.setName(StringUtils.abbreviate(name, 200));</span>
+<span class="nc" id="L153">        file.setMimeType(mimeType);</span>
+<span class="nc" id="L154">        file.setUserId(userId);</span>
+<span class="nc" id="L155">        file.setSize(fileSize);</span>
+
+        // Get files of this document
+<span class="nc" id="L158">        FileDao fileDao = new FileDao();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (documentId != null) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (previousFileId == null) {</span>
+                // It's not a new version, so put it in last order
+<span class="nc" id="L162">                file.setOrder(fileDao.getByDocumentId(userId, documentId).size());</span>
+            } else {
+                // It's a new version, update the previous version
+<span class="nc" id="L165">                File previousFile = fileDao.getActiveById(previousFileId);</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">                if (previousFile == null || !previousFile.getDocumentId().equals(documentId)) {</span>
+<span class="nc" id="L167">                    throw new IOException(&quot;Previous version mismatch&quot;);</span>
+                }
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                if (previousFile.getVersionId() == null) {</span>
+<span class="nc" id="L171">                    previousFile.setVersionId(UUID.randomUUID().toString());</span>
+                }
+
+                // Copy the previous file metadata
+<span class="nc" id="L175">                file.setOrder(previousFile.getOrder());</span>
+<span class="nc" id="L176">                file.setVersionId(previousFile.getVersionId());</span>
+<span class="nc" id="L177">                file.setVersion(previousFile.getVersion() + 1);</span>
+
+                // Update the previous file
+<span class="nc" id="L180">                previousFile.setLatestVersion(false);</span>
+<span class="nc" id="L181">                fileDao.update(previousFile);</span>
+            }
+        }
+
+        // Create the file
+<span class="nc" id="L186">        String fileId = fileDao.create(file, userId);</span>
+
+        // Save the file
+<span class="nc" id="L189">        Cipher cipher = EncryptionUtil.getEncryptionCipher(user.getPrivateKey());</span>
+<span class="nc" id="L190">        Path path = DirectoryUtil.getStorageDirectory().resolve(file.getId());</span>
+<span class="nc" id="L191">        try (InputStream inputStream = Files.newInputStream(unencryptedFile)) {</span>
+<span class="nc" id="L192">            Files.copy(new CipherInputStream(inputStream, cipher), path);</span>
+        }
+
+        // Update the user quota
+<span class="nc" id="L196">        user.setStorageCurrent(user.getStorageCurrent() + fileSize);</span>
+<span class="nc" id="L197">        userDao.updateQuota(user);</span>
+
+        // Raise a new file created event and document updated event if we have a document
+<span class="nc" id="L200">        startProcessingFile(fileId);</span>
+<span class="nc" id="L201">        FileCreatedAsyncEvent fileCreatedAsyncEvent = new FileCreatedAsyncEvent();</span>
+<span class="nc" id="L202">        fileCreatedAsyncEvent.setUserId(userId);</span>
+<span class="nc" id="L203">        fileCreatedAsyncEvent.setLanguage(language);</span>
+<span class="nc" id="L204">        fileCreatedAsyncEvent.setFileId(file.getId());</span>
+<span class="nc" id="L205">        fileCreatedAsyncEvent.setUnencryptedFile(unencryptedFile);</span>
+<span class="nc" id="L206">        ThreadLocalContext.get().addAsyncEvent(fileCreatedAsyncEvent);</span>
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (documentId != null) {</span>
+<span class="nc" id="L209">            DocumentUpdatedAsyncEvent documentUpdatedAsyncEvent = new DocumentUpdatedAsyncEvent();</span>
+<span class="nc" id="L210">            documentUpdatedAsyncEvent.setUserId(userId);</span>
+<span class="nc" id="L211">            documentUpdatedAsyncEvent.setDocumentId(documentId);</span>
+<span class="nc" id="L212">            ThreadLocalContext.get().addAsyncEvent(documentUpdatedAsyncEvent);</span>
+        }
+
+<span class="nc" id="L215">        return fileId;</span>
+    }
+
+    /**
+     * Start processing a file.
+     *
+     * @param fileId File ID
+     */
+    public static void startProcessingFile(String fileId) {
+<span class="nc" id="L224">        processingFileSet.add(fileId);</span>
+<span class="nc" id="L225">        log.info(&quot;Processing started for file: &quot; + fileId);</span>
+<span class="nc" id="L226">    }</span>
+
+    /**
+     * End processing a file.
+     *
+     * @param fileId File ID
+     */
+    public static void endProcessingFile(String fileId) {
+<span class="nc" id="L234">        processingFileSet.remove(fileId);</span>
+<span class="nc" id="L235">        log.info(&quot;Processing ended for file: &quot; + fileId);</span>
+<span class="nc" id="L236">    }</span>
+
+    /**
+     * Return true if a file is currently processing.
+     *
+     * @param fileId File ID
+     * @return True if the file is processing
+     */
+    public static boolean isProcessingFile(String fileId) {
+<span class="nc" id="L245">        return processingFileSet.contains(fileId);</span>
+    }
+
+    /**
+     * Get the size of a file on disk.
+     *
+     * @param fileId the file id
+     * @param user   the file owner
+     * @return the size or -1 if something went wrong
+     */
+    public static long getFileSize(String fileId, User user) {
+        // To get the size we copy the decrypted content into a null output stream
+        // and count the copied byte size.
+<span class="nc" id="L258">        Path storedFile = DirectoryUtil.getStorageDirectory().resolve(fileId);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        if (! Files.exists(storedFile)) {</span>
+<span class="nc" id="L260">            log.debug(&quot;File does not exist &quot; + fileId);</span>
+<span class="nc" id="L261">            return File.UNKNOWN_SIZE;</span>
+        }
+<span class="nc" id="L263">        try (InputStream fileInputStream = Files.newInputStream(storedFile);</span>
+<span class="nc" id="L264">             InputStream inputStream = EncryptionUtil.decryptInputStream(fileInputStream, user.getPrivateKey());</span>
+<span class="nc" id="L265">             CountingInputStream countingInputStream = new CountingInputStream(inputStream);</span>
+        ) {
+<span class="nc" id="L267">            IOUtils.copy(countingInputStream, NullOutputStream.NULL_OUTPUT_STREAM);</span>
+<span class="nc" id="L268">            return countingInputStream.getByteCount();</span>
+<span class="nc" id="L269">        } catch (Exception e) {</span>
+<span class="nc" id="L270">            log.debug(&quot;Can't find size of file &quot; + fileId, e);</span>
+<span class="nc" id="L271">            return File.UNKNOWN_SIZE;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RouteStepDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.dao</a> &gt; <span class="el_source">RouteStepDao.java</span></div><h1>RouteStepDao.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.dao;
+
+import com.google.common.base.Joiner;
+import com.sismics.docs.core.constant.AclTargetType;
+import com.sismics.docs.core.constant.RouteStepTransition;
+import com.sismics.docs.core.constant.RouteStepType;
+import com.sismics.docs.core.dao.criteria.RouteStepCriteria;
+import com.sismics.docs.core.dao.dto.RouteStepDto;
+import com.sismics.docs.core.model.jpa.RouteStep;
+import com.sismics.docs.core.util.jpa.QueryParam;
+import com.sismics.docs.core.util.jpa.QueryUtil;
+import com.sismics.docs.core.util.jpa.SortCriteria;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import java.sql.Timestamp;
+import java.util.*;
+
+/**
+ * Route step DAO.
+ * 
+ * @author bgamard
+ */
+<span class="nc" id="L25">public class RouteStepDao {</span>
+    /**
+     * Creates a new route step.
+     *
+     * @param routeStep Route step
+     * @return New ID
+     */
+    public String create(RouteStep routeStep) {
+        // Create the UUID
+<span class="nc" id="L34">        routeStep.setId(UUID.randomUUID().toString());</span>
+
+        // Create the route step
+<span class="nc" id="L37">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L38">        routeStep.setCreateDate(new Date());</span>
+<span class="nc" id="L39">        em.persist(routeStep);</span>
+
+<span class="nc" id="L41">        return routeStep.getId();</span>
+    }
+
+    /**
+     * Get the current route step from a document.
+     *
+     * @param documentId Document ID
+     * @return Current route step
+     */
+    public RouteStepDto getCurrentStep(String documentId) {
+<span class="nc" id="L51">        List&lt;RouteStepDto&gt; routeStepDtoList = findByCriteria(new RouteStepCriteria()</span>
+<span class="nc" id="L52">                .setDocumentId(documentId)</span>
+<span class="nc" id="L53">                .setEndDateIsNull(true), new SortCriteria(6, true));</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (routeStepDtoList.isEmpty()) {</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+<span class="nc" id="L57">        return routeStepDtoList.get(0);</span>
+    }
+
+    /**
+     * Returns the list of all route steps.
+     *
+     * @param criteria Search criteria
+     * @param sortCriteria Sort criteria
+     * @return List of route steps
+     */
+    public List&lt;RouteStepDto&gt; findByCriteria(RouteStepCriteria criteria, SortCriteria sortCriteria) {
+<span class="nc" id="L68">        Map&lt;String, Object&gt; parameterMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L69">        List&lt;String&gt; criteriaList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L71">        StringBuilder sb = new StringBuilder(&quot;select rs.RTP_ID_C, rs.RTP_NAME_C c0, rs.RTP_TYPE_C c1, rs.RTP_TRANSITION_C c2, rs.RTP_COMMENT_C c3, rs.RTP_IDTARGET_C c4, u.USE_USERNAME_C as targetUsername, g.GRP_NAME_C, rs.RTP_ENDDATE_D c5, uv.USE_USERNAME_C as validatorUsername, rs.RTP_IDROUTE_C, rs.RTP_TRANSITIONS_C, rs.RTP_ORDER_N c6&quot;)</span>
+<span class="nc" id="L72">            .append(&quot; from T_ROUTE_STEP rs &quot;)</span>
+<span class="nc" id="L73">            .append(&quot; join T_ROUTE r on r.RTE_ID_C = rs.RTP_IDROUTE_C &quot;)</span>
+<span class="nc" id="L74">            .append(&quot; left join T_USER uv on uv.USE_ID_C = rs.RTP_IDVALIDATORUSER_C &quot;)</span>
+<span class="nc" id="L75">            .append(&quot; left join T_USER u on u.USE_ID_C = rs.RTP_IDTARGET_C &quot;)</span>
+<span class="nc" id="L76">            .append(&quot; left join T_SHARE s on s.SHA_ID_C = rs.RTP_IDTARGET_C &quot;)</span>
+<span class="nc" id="L77">            .append(&quot; left join T_GROUP g on g.GRP_ID_C = rs.RTP_IDTARGET_C &quot;);</span>
+
+        // Add search criterias
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (criteria.getDocumentId() != null) {</span>
+<span class="nc" id="L81">            criteriaList.add(&quot;r.RTE_IDDOCUMENT_C = :documentId&quot;);</span>
+<span class="nc" id="L82">            parameterMap.put(&quot;documentId&quot;, criteria.getDocumentId());</span>
+        }
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (criteria.getRouteId() != null) {</span>
+<span class="nc" id="L85">            criteriaList.add(&quot;rs.RTP_IDROUTE_C = :routeId&quot;);</span>
+<span class="nc" id="L86">            parameterMap.put(&quot;routeId&quot;, criteria.getRouteId());</span>
+        }
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (criteria.getEndDateIsNull() != null) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            criteriaList.add(&quot;RTP_ENDDATE_D is &quot; + (criteria.getEndDateIsNull() ? &quot;&quot; : &quot;not&quot;) + &quot; null&quot;);</span>
+        }
+<span class="nc" id="L91">        criteriaList.add(&quot;rs.RTP_DELETEDATE_D is null&quot;);</span>
+
+<span class="nc" id="L93">        sb.append(&quot; where &quot;);</span>
+<span class="nc" id="L94">        sb.append(Joiner.on(&quot; and &quot;).join(criteriaList));</span>
+
+        // Perform the search
+<span class="nc" id="L97">        QueryParam queryParam = QueryUtil.getSortedQueryParam(new QueryParam(sb.toString(), parameterMap), sortCriteria);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L99">        List&lt;Object[]&gt; l = QueryUtil.getNativeQuery(queryParam).getResultList();</span>
+
+        // Assemble results
+<span class="nc" id="L102">        List&lt;RouteStepDto&gt; dtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        for (Object[] o : l) {</span>
+<span class="nc" id="L104">            int i = 0;</span>
+<span class="nc" id="L105">            RouteStepDto dto = new RouteStepDto();</span>
+<span class="nc" id="L106">            dto.setId((String) o[i++]);</span>
+<span class="nc" id="L107">            dto.setName((String) o[i++]);</span>
+<span class="nc" id="L108">            dto.setType(RouteStepType.valueOf((String) o[i++]));</span>
+<span class="nc" id="L109">            dto.setTransition((String) o[i++]);</span>
+<span class="nc" id="L110">            dto.setComment((String) o[i++]);</span>
+<span class="nc" id="L111">            dto.setTargetId((String) o[i++]);</span>
+<span class="nc" id="L112">            String userName = (String) o[i++];</span>
+<span class="nc" id="L113">            String groupName = (String) o[i++];</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            if (userName != null) {</span>
+<span class="nc" id="L115">                dto.setTargetName(userName);</span>
+<span class="nc" id="L116">                dto.setTargetType(AclTargetType.USER.name());</span>
+            }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (groupName != null) {</span>
+<span class="nc" id="L119">                dto.setTargetName(groupName);</span>
+<span class="nc" id="L120">                dto.setTargetType(AclTargetType.GROUP.name());</span>
+            }
+<span class="nc" id="L122">            Timestamp endDateTimestamp = (Timestamp) o[i++];</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            dto.setEndDateTimestamp(endDateTimestamp == null ? null : endDateTimestamp.getTime());</span>
+<span class="nc" id="L124">            dto.setValidatorUserName((String) o[i++]);</span>
+<span class="nc" id="L125">            dto.setRouteId((String) o[i++]);</span>
+<span class="nc" id="L126">            dto.setTransitions((String) o[i]);</span>
+<span class="nc" id="L127">            dtoList.add(dto);</span>
+<span class="nc" id="L128">        }</span>
+<span class="nc" id="L129">        return dtoList;</span>
+    }
+
+    /**
+     * End a route step.
+     *
+     * @param id Route step ID
+     * @param transition Transition
+     * @param comment Comment
+     * @param validatorUserId Validator user ID
+     */
+    public void endRouteStep(String id, RouteStepTransition transition, String comment, String validatorUserId) {
+<span class="nc" id="L141">        StringBuilder sb = new StringBuilder(&quot;update T_ROUTE_STEP r &quot;);</span>
+<span class="nc" id="L142">        sb.append(&quot; set RTP_ENDDATE_D = :endDate, RTP_TRANSITION_C = :transition, RTP_COMMENT_C = :comment, RTP_IDVALIDATORUSER_C = :validatorUserId &quot;);</span>
+<span class="nc" id="L143">        sb.append(&quot; where r.RTP_ID_C = :id&quot;);</span>
+
+<span class="nc" id="L145">        EntityManager em = ThreadLocalContext.get().getEntityManager();</span>
+<span class="nc" id="L146">        Query q = em.createNativeQuery(sb.toString());</span>
+<span class="nc" id="L147">        q.setParameter(&quot;endDate&quot;, new Date());</span>
+<span class="nc" id="L148">        q.setParameter(&quot;transition&quot;, transition.name());</span>
+<span class="nc" id="L149">        q.setParameter(&quot;comment&quot;, comment);</span>
+<span class="nc" id="L150">        q.setParameter(&quot;validatorUserId&quot;, validatorUserId);</span>
+<span class="nc" id="L151">        q.setParameter(&quot;id&quot;, id);</span>
+<span class="nc" id="L152">        q.executeUpdate();</span>
+<span class="nc" id="L153">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

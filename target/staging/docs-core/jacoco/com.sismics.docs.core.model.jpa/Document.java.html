@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Document.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">Document.java</span></div><h1>Document.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import com.google.common.base.MoreObjects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.Date;
+
+/**
+ * Document entity.
+ * 
+ * @author bgamard
+ */
+@Entity
+@Table(name = &quot;T_DOCUMENT&quot;)
+<span class="nc" id="L18">public class Document implements Loggable {</span>
+    /**
+     * Document ID.
+     */
+    @Id
+    @Column(name = &quot;DOC_ID_C&quot;, length = 36)
+    private String id;
+    
+    /**
+     * User ID.
+     */
+    @Column(name = &quot;DOC_IDUSER_C&quot;, nullable = false, length = 36)
+    private String userId;
+    
+    /**
+     * Main file ID.
+     */
+    @Column(name = &quot;DOC_IDFILE_C&quot;, length = 36)
+    private String fileId;
+
+    /**
+     * Language (ISO 639-9).
+     */
+    @Column(name = &quot;DOC_LANGUAGE_C&quot;, nullable = false, length = 3)
+    private String language;
+    
+    /**
+     * Title.
+     */
+    @Column(name = &quot;DOC_TITLE_C&quot;, nullable = false, length = 100)
+    private String title;
+    
+    /**
+     * Description.
+     */
+    @Column(name = &quot;DOC_DESCRIPTION_C&quot;, length = 4000)
+    private String description;
+    
+    /**
+     * Subject.
+     */
+    @Column(name = &quot;DOC_SUBJECT_C&quot;, length = 500)
+    private String subject;
+    
+    /**
+     * Identifer.
+     */
+    @Column(name = &quot;DOC_IDENTIFIER_C&quot;, length = 500)
+    private String identifier;
+    
+    /**
+     * Publisher.
+     */
+    @Column(name = &quot;DOC_PUBLISHER_C&quot;, length = 500)
+    private String publisher;
+    
+    /**
+     * Format.
+     */
+    @Column(name = &quot;DOC_FORMAT_C&quot;, length = 500)
+    private String format;
+    
+    /**
+     * Source.
+     */
+    @Column(name = &quot;DOC_SOURCE_C&quot;, length = 500)
+    private String source;
+    
+    /**
+     * Type.
+     */
+    @Column(name = &quot;DOC_TYPE_C&quot;, length = 100)
+    private String type;
+    
+    /**
+     * Coverage.
+     */
+    @Column(name = &quot;DOC_COVERAGE_C&quot;, length = 100)
+    private String coverage;
+    
+    /**
+     * Rights.
+     */
+    @Column(name = &quot;DOC_RIGHTS_C&quot;, length = 100)
+    private String rights;
+    
+    /**
+     * Creation date.
+     */
+    @Column(name = &quot;DOC_CREATEDATE_D&quot;, nullable = false)
+    private Date createDate;
+
+    /**
+     * Creation date.
+     */
+    @Column(name = &quot;DOC_UPDATEDATE_D&quot;, nullable = false)
+    private Date updateDate;
+
+    /**
+     * Deletion date.
+     */
+    @Column(name = &quot;DOC_DELETEDATE_D&quot;)
+    private Date deleteDate;
+    
+    public String getId() {
+<span class="nc" id="L123">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L127">        this.id = id;</span>
+<span class="nc" id="L128">    }</span>
+    
+    public String getLanguage() {
+<span class="nc" id="L131">        return language;</span>
+    }
+
+    public void setLanguage(String language) {
+<span class="nc" id="L135">        this.language = language;</span>
+<span class="nc" id="L136">    }</span>
+    
+    public String getUserId() {
+<span class="nc" id="L139">        return userId;</span>
+    }
+
+    public void setUserId(String userId) {
+<span class="nc" id="L143">        this.userId = userId;</span>
+<span class="nc" id="L144">    }</span>
+
+    public String getFileId() {
+<span class="nc" id="L147">        return fileId;</span>
+    }
+
+    public Document setFileId(String fileId) {
+<span class="nc" id="L151">        this.fileId = fileId;</span>
+<span class="nc" id="L152">        return this;</span>
+    }
+
+    public String getTitle() {
+<span class="nc" id="L156">        return title;</span>
+    }
+
+    public void setTitle(String title) {
+<span class="nc" id="L160">        this.title = title;</span>
+<span class="nc" id="L161">    }</span>
+
+    public String getDescription() {
+<span class="nc" id="L164">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L168">        this.description = description;</span>
+<span class="nc" id="L169">    }</span>
+    
+    public String getSubject() {
+<span class="nc" id="L172">        return subject;</span>
+    }
+
+    public void setSubject(String subject) {
+<span class="nc" id="L176">        this.subject = subject;</span>
+<span class="nc" id="L177">    }</span>
+
+    public String getIdentifier() {
+<span class="nc" id="L180">        return identifier;</span>
+    }
+
+    public void setIdentifier(String identifier) {
+<span class="nc" id="L184">        this.identifier = identifier;</span>
+<span class="nc" id="L185">    }</span>
+    
+    public String getPublisher() {
+<span class="nc" id="L188">        return publisher;</span>
+    }
+
+    public void setPublisher(String publisher) {
+<span class="nc" id="L192">        this.publisher = publisher;</span>
+<span class="nc" id="L193">    }</span>
+
+    public String getFormat() {
+<span class="nc" id="L196">        return format;</span>
+    }
+
+    public void setFormat(String format) {
+<span class="nc" id="L200">        this.format = format;</span>
+<span class="nc" id="L201">    }</span>
+
+    public String getSource() {
+<span class="nc" id="L204">        return source;</span>
+    }
+
+    public void setSource(String source) {
+<span class="nc" id="L208">        this.source = source;</span>
+<span class="nc" id="L209">    }</span>
+
+    public String getType() {
+<span class="nc" id="L212">        return type;</span>
+    }
+
+    public void setType(String type) {
+<span class="nc" id="L216">        this.type = type;</span>
+<span class="nc" id="L217">    }</span>
+
+    public String getCoverage() {
+<span class="nc" id="L220">        return coverage;</span>
+    }
+
+    public void setCoverage(String coverage) {
+<span class="nc" id="L224">        this.coverage = coverage;</span>
+<span class="nc" id="L225">    }</span>
+
+    public String getRights() {
+<span class="nc" id="L228">        return rights;</span>
+    }
+
+    public void setRights(String rights) {
+<span class="nc" id="L232">        this.rights = rights;</span>
+<span class="nc" id="L233">    }</span>
+
+    public Date getCreateDate() {
+<span class="nc" id="L236">        return createDate;</span>
+    }
+
+    public void setCreateDate(Date createDate) {
+<span class="nc" id="L240">        this.createDate = createDate;</span>
+<span class="nc" id="L241">    }</span>
+
+    @Override
+    public Date getDeleteDate() {
+<span class="nc" id="L245">        return deleteDate;</span>
+    }
+
+    public void setDeleteDate(Date deleteDate) {
+<span class="nc" id="L249">        this.deleteDate = deleteDate;</span>
+<span class="nc" id="L250">    }</span>
+
+    public Date getUpdateDate() {
+<span class="nc" id="L253">        return updateDate;</span>
+    }
+
+    public void setUpdateDate(Date updateDate) {
+<span class="nc" id="L257">        this.updateDate = updateDate;</span>
+<span class="nc" id="L258">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L262">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L263">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L264">                .toString();</span>
+    }
+
+    @Override
+    public String toMessage() {
+<span class="nc" id="L269">        return title;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

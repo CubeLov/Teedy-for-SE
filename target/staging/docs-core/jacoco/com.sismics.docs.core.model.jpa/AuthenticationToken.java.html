@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationToken.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">AuthenticationToken.java</span></div><h1>AuthenticationToken.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import com.google.common.base.MoreObjects;
+
+/**
+ * Authentication token entity.
+ * 
+ * @author jtremeaux
+ */
+@Entity
+@Table(name = &quot;T_AUTHENTICATION_TOKEN&quot;)
+<span class="nc" id="L19">public class AuthenticationToken {</span>
+    /**
+     * Token.
+     */
+    @Id
+    @Column(name = &quot;AUT_ID_C&quot;, length = 36)
+    private String id;
+
+    /**
+     * User ID.
+     */
+    @Column(name = &quot;AUT_IDUSER_C&quot;, nullable = false, length = 36)
+    private String userId;
+    
+    /**
+     * Login IP.
+     */
+    @Column(name = &quot;AUT_IP_C&quot;, nullable = true, length = 45)
+    private String ip;
+    
+    /**
+     * Login user agent.
+     */
+    @Column(name = &quot;AUT_UA_C&quot;, nullable = true, length = 1000)
+    private String userAgent;
+    
+    /**
+     * Remember the user next time (long lasted session).
+     */
+    @Column(name = &quot;AUT_LONGLASTED_B&quot;, nullable = false)
+    private boolean longLasted;
+    
+    /**
+     * Token creation date.
+     */
+    @Column(name = &quot;AUT_CREATIONDATE_D&quot;, nullable = false)
+    private Date creationDate;
+
+    /**
+     * Last connection date using this token.
+     */
+    @Column(name = &quot;AUT_LASTCONNECTIONDATE_D&quot;)
+    private Date lastConnectionDate;
+
+    public String getId() {
+<span class="nc" id="L64">        return id;</span>
+    }
+
+    public AuthenticationToken setId(String id) {
+<span class="nc" id="L68">        this.id = id;</span>
+<span class="nc" id="L69">        return this;</span>
+    }
+
+    public String getUserId() {
+<span class="nc" id="L73">        return userId;</span>
+    }
+
+    public AuthenticationToken setUserId(String userId) {
+<span class="nc" id="L77">        this.userId = userId;</span>
+<span class="nc" id="L78">        return this;</span>
+    }
+
+    public boolean isLongLasted() {
+<span class="nc" id="L82">        return longLasted;</span>
+    }
+
+    public AuthenticationToken setLongLasted(boolean longLasted) {
+<span class="nc" id="L86">        this.longLasted = longLasted;</span>
+<span class="nc" id="L87">        return this;</span>
+    }
+    
+    public String getIp() {
+<span class="nc" id="L91">        return ip;</span>
+    }
+
+    public AuthenticationToken setIp(String ip) {
+<span class="nc" id="L95">        this.ip = ip;</span>
+<span class="nc" id="L96">        return this;</span>
+    }
+
+    public String getUserAgent() {
+<span class="nc" id="L100">        return userAgent;</span>
+    }
+
+    public AuthenticationToken setUserAgent(String userAgent) {
+<span class="nc" id="L104">        this.userAgent = userAgent;</span>
+<span class="nc" id="L105">        return this;</span>
+    }
+
+    public Date getCreationDate() {
+<span class="nc" id="L109">        return creationDate;</span>
+    }
+
+    public AuthenticationToken setCreationDate(Date creationDate) {
+<span class="nc" id="L113">        this.creationDate = creationDate;</span>
+<span class="nc" id="L114">        return this;</span>
+    }
+
+    public Date getLastConnectionDate() {
+<span class="nc" id="L118">        return lastConnectionDate;</span>
+    }
+
+    public AuthenticationToken setLastConnectionDate(Date lastConnectionDate) {
+<span class="nc" id="L122">        this.lastConnectionDate = lastConnectionDate;</span>
+<span class="nc" id="L123">        return this;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L128">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L129">                .add(&quot;id&quot;, &quot;**hidden**&quot;)</span>
+<span class="nc" id="L130">                .add(&quot;userId&quot;, userId)</span>
+<span class="nc" id="L131">                .add(&quot;ip&quot;, ip)</span>
+<span class="nc" id="L132">                .add(&quot;userAgent&quot;, userAgent)</span>
+<span class="nc" id="L133">                .add(&quot;longLasted&quot;, longLasted)</span>
+<span class="nc" id="L134">                .toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

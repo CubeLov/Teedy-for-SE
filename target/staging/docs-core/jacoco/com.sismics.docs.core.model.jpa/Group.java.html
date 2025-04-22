@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Group.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">Group.java</span></div><h1>Group.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import com.google.common.base.MoreObjects;
+
+/**
+ * Group entity.
+ * 
+ * @author bgamard
+ */
+@Entity
+@Table(name = &quot;T_GROUP&quot;)
+<span class="nc" id="L19">public class Group implements Loggable {</span>
+    /**
+     * Group ID.
+     */
+    @Id
+    @Column(name = &quot;GRP_ID_C&quot;, nullable = false, length = 36)
+    private String id;
+    
+    /**
+     * Vocabulary value.
+     */
+    @Column(name = &quot;GRP_IDPARENT_C&quot;, length = 36)
+    private String parentId;
+    
+    /**
+     * Group name.
+     */
+    @Column(name = &quot;GRP_NAME_C&quot;, nullable = false, length = 50)
+    private String name;
+
+    /**
+     * Role ID.
+     */
+    @Column(name = &quot;GRP_IDROLE_C&quot;, length = 36)
+    private String roleId;
+    
+    /**
+     * Deletion date.
+     */
+    @Column(name = &quot;GRP_DELETEDATE_D&quot;)
+    private Date deleteDate;
+    
+    public String getId() {
+<span class="nc" id="L52">        return id;</span>
+    }
+
+    public Group setId(String id) {
+<span class="nc" id="L56">        this.id = id;</span>
+<span class="nc" id="L57">        return this;</span>
+    }
+
+    public String getParentId() {
+<span class="nc" id="L61">        return parentId;</span>
+    }
+
+    public Group setParentId(String parentId) {
+<span class="nc" id="L65">        this.parentId = parentId;</span>
+<span class="nc" id="L66">        return this;</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L70">        return name;</span>
+    }
+
+    public Group setName(String name) {
+<span class="nc" id="L74">        this.name = name;</span>
+<span class="nc" id="L75">        return this;</span>
+    }
+
+    @Override
+    public Date getDeleteDate() {
+<span class="nc" id="L80">        return deleteDate;</span>
+    }
+    
+    public Group setDeleteDate(Date deleteDate) {
+<span class="nc" id="L84">        this.deleteDate = deleteDate;</span>
+<span class="nc" id="L85">        return this;</span>
+    }
+    
+    public String getRoleId() {
+<span class="nc" id="L89">        return roleId;</span>
+    }
+
+    public Group setRoleId(String roleId) {
+<span class="nc" id="L93">        this.roleId = roleId;</span>
+<span class="nc" id="L94">        return this;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L99">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L100">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L101">                .add(&quot;roleId&quot;, roleId)</span>
+<span class="nc" id="L102">                .add(&quot;parentId&quot;, parentId)</span>
+<span class="nc" id="L103">                .add(&quot;name&quot;, name)</span>
+<span class="nc" id="L104">                .toString();</span>
+    }
+
+    @Override
+    public String toMessage() {
+<span class="nc" id="L109">        return name;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

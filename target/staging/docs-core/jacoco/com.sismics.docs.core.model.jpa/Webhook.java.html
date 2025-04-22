@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Webhook.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Docs Core</a> &gt; <a href="index.source.html" class="el_package">com.sismics.docs.core.model.jpa</a> &gt; <span class="el_source">Webhook.java</span></div><h1>Webhook.java</h1><pre class="source lang-java linenums">package com.sismics.docs.core.model.jpa;
+
+import com.google.common.base.MoreObjects;
+import com.sismics.docs.core.constant.WebhookEvent;
+
+import jakarta.persistence.*;
+import java.util.Date;
+
+/**
+ * Webhook entity.
+ * 
+ * @author bgamard
+ */
+@Entity
+@Table(name = &quot;T_WEBHOOK&quot;)
+<span class="nc" id="L16">public class Webhook implements Loggable {</span>
+    /**
+     * Webhook ID.
+     */
+    @Id
+    @Column(name = &quot;WHK_ID_C&quot;, nullable = false, length = 36)
+    private String id;
+    
+    /**
+     * Event.
+     */
+    @Column(name = &quot;WHK_EVENT_C&quot;, nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private WebhookEvent event;
+    
+    /**
+     * URL.
+     */
+    @Column(name = &quot;WHK_URL_C&quot;, nullable = false, length = 1024)
+    private String url;
+
+    /**
+     * Creation date.
+     */
+    @Column(name = &quot;WHK_CREATEDATE_D&quot;, nullable = false)
+    private Date createDate;
+
+    /**
+     * Deletion date.
+     */
+    @Column(name = &quot;WHK_DELETEDATE_D&quot;)
+    private Date deleteDate;
+
+    public String getId() {
+<span class="nc" id="L50">        return id;</span>
+    }
+
+    public Webhook setId(String id) {
+<span class="nc" id="L54">        this.id = id;</span>
+<span class="nc" id="L55">        return this;</span>
+    }
+
+    public WebhookEvent getEvent() {
+<span class="nc" id="L59">        return event;</span>
+    }
+
+    public Webhook setEvent(WebhookEvent event) {
+<span class="nc" id="L63">        this.event = event;</span>
+<span class="nc" id="L64">        return this;</span>
+    }
+
+    public String getUrl() {
+<span class="nc" id="L68">        return url;</span>
+    }
+
+    public Webhook setUrl(String url) {
+<span class="nc" id="L72">        this.url = url;</span>
+<span class="nc" id="L73">        return this;</span>
+    }
+
+    public Date getCreateDate() {
+<span class="nc" id="L77">        return createDate;</span>
+    }
+
+    public Webhook setCreateDate(Date createDate) {
+<span class="nc" id="L81">        this.createDate = createDate;</span>
+<span class="nc" id="L82">        return this;</span>
+    }
+
+    @Override
+    public Date getDeleteDate() {
+<span class="nc" id="L87">        return deleteDate;</span>
+    }
+
+    public Webhook setDeleteDate(Date deleteDate) {
+<span class="nc" id="L91">        this.deleteDate = deleteDate;</span>
+<span class="nc" id="L92">        return this;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L97">        return MoreObjects.toStringHelper(this)</span>
+<span class="nc" id="L98">                .add(&quot;id&quot;, id)</span>
+<span class="nc" id="L99">                .add(&quot;event&quot;, event)</span>
+<span class="nc" id="L100">                .add(&quot;url&quot;, url)</span>
+<span class="nc" id="L101">                .toString();</span>
+    }
+
+    @Override
+    public String toMessage() {
+<span class="nc" id="L106">        return url;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
