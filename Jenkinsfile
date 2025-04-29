@@ -40,6 +40,7 @@ pipeline {
         stage('Site') {
             steps {
                 sh 'mvn site'
+                sh 'mvn site:stage'
             }
         }
         stage('Package') {
