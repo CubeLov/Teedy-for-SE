@@ -297,6 +297,7 @@
     "user": {
       "title": "Zarządzanie użytkownikami",
       "add_user": "Dodaj użytkownika",
+      "add_user_request": "Add a user request",
       "username": "Nazwa użytkownika",
       "create_date": "Data utowrzenia",
       "totp_enabled": "Uwierzytelnienie dwuskładnikowe jest włączone dla tego konta",

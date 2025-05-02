@@ -250,6 +250,7 @@
     "user": {
       "title": "<small>Управление</small> пользователями",
       "add_user": "Добавить пользователя",
+      "add_user_request": "Add a user request",
       "username": "Имя пользователя",
       "create_date": "Создать дату",
       "totp_enabled": "Для этого аккаунта включена двухфакторная аутентификация",

@@ -298,6 +298,7 @@
     "user": {
       "title": "Users management",
       "add_user": "Add a user",
+      "add_user_request": "Add a user request",
       "username": "Username",
       "create_date": "Create date",
       "totp_enabled": "Two-factor authentication enabled for this account",
