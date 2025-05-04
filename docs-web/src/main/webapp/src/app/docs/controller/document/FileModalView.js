@@ -99,6 +99,48 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
   };
 
   /**
+   * Translate the file. 
+  */
+  $scope.translateFile = function () {
+    console.log('Translating file...');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../api/file/' + $stateParams.fileId + '/data?size=content', true);
+    xhr.onreadystatechange = async function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var fileContent = xhr.responseText;
+        const data = {
+          text: fileContent,
+          source: 'auto',
+          target: 'zh'
+        };
+        try {
+          const response = await fetch('http://localhost:5001/api/python-translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+          if (result.error) {
+            console.error(result.error);
+          } else {
+            console.log(result.result);
+            var popup = window.open('', '_blank');
+            popup.document.write('<html><head><title>翻译结果</title></head><body>');
+            popup.document.write('<div>' + result.result + '</div>');
+            popup.document.write('</body></html>');
+            popup.document.close();
+          }
+        } catch (error) {
+          console.error('请求出错:', error);
+        }
+      }
+    }
+    xhr.send();
+  };
+   
+  /** 
    * Close the file preview.
    */
   $scope.closeFile = function () {
