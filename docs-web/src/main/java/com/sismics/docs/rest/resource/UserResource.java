@@ -84,7 +84,8 @@ public class UserResource extends BaseResource {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
-        checkBaseFunction(BaseFunction.ADMIN);
+
+        // checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
         username = ValidationUtil.validateLength(username, "username", 3, 50);
@@ -103,6 +104,9 @@ public class UserResource extends BaseResource {
         user.setStorageQuota(storageQuota);
         user.setOnboarding(true);
 
+        if ("guest".equals(principal.getName())) {
+            user.setDisableDate(new Date());
+        }
         // Create the user
         UserDao userDao = new UserDao();
         try {

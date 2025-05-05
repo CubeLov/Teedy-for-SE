@@ -250,6 +250,7 @@
     "user": {
       "title": "用户 <small>管理</small>",
       "add_user": "添加用户",
+      "add_user_request": "添加用户请求",
       "username": "用户名",
       "create_date": "创建日期",
       "totp_enabled": "为该帐号启用双身份认证",

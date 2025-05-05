@@ -30,6 +30,16 @@ public class TestJpa extends BaseTransactionalTest {
         // Authenticate using the database
         Assert.assertNotNull(new InternalAuthenticationHandler().authenticate("testJpa", "12345678"));
 
+        /*
+         * SE Lab 8
+         */
+        // Set a new email and update the database
+        user.setEmail("abc@qq.com");
+        Assert.assertEquals("abc@qq.com", user.getEmail());
+        userDao.update(user, user.getId());
+        user = userDao.getById(user.getId());
+        Assert.assertEquals("abc@qq.com", user.getEmail());
+
         // Delete the created user
         userDao.delete("testJpa", user.getId());
         TransactionUtil.commit();

@@ -12,6 +12,11 @@ pipeline {
                 sh 'mvn compile'
             }
         }
+        stage('Install') {
+            steps {
+                sh 'mvn install -DskipTests'
+            }
+        }
         stage('Test') {
             steps {
                 sh 'mvn test -Dmaven.test.failure.ignore=true'
@@ -35,6 +40,7 @@ pipeline {
         stage('Site') {
             steps {
                 sh 'mvn site'
+                sh 'mvn site:stage'
             }
         }
         stage('Package') {
