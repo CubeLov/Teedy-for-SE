@@ -3,7 +3,7 @@ pipeline {
     environment {
         DEPLOYMENT_NAME = "hello-node"
         CONTAINER_NAME = "ham-teedy-2whw7"
-        IMAGE_NAME = "oldhamster123/ham_teedy:latest"
+        IMAGE_NAME = "registry.hub.docker.com/oldhamster123/ham_teedy:latest"
     }
     stages {
         stage('Start Minikube') {
@@ -22,7 +22,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Setting image for deployment..."
-                    kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE_N
+                    kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE_NAME}
                 '''
             }
         }
