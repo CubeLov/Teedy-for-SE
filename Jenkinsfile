@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DEPLOYMENT_NAME = "hello-node"
-        CONTAINER_NAME = "ham-teedy-2whw7"
+        CONTAINER_NAME = "ham-teedy-gcr9t"
         IMAGE_NAME = "registry.hub.docker.com/oldhamster123/ham_teedy:latest"
     }
     stages {
