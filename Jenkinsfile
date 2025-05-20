@@ -1,62 +1,36 @@
 pipeline {
     agent any
-
+    environment {
+        DEPLOYMENT_NAME = "hello-node"
+        CONTAINER_NAME = "ham-teedy-7w7bf"
+        IMAGE_NAME = "registry.hub.docker.com/oldhamster123/ham_teedy:latest"
+    }
     stages {
-        stage('Clean') {
+        stage('Start Minikube') {
             steps {
-                sh 'mvn clean'
+                sh '''
+                    if ! minikube status | grep -q "Running"; then
+                        echo "Starting Minikube..."
+                        minikube start
+                    else
+                        echo "Minikube already running."
+                    fi
+                '''
             }
         }
-        stage('Compile') {
+        stage('Set Image') {
             steps {
-                sh 'mvn compile'
+                sh '''
+                    echo "Setting image for deployment..."
+                    kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE_NAME}
+                '''
             }
         }
-        stage('Install') {
+        stage('Verify') {
             steps {
-                sh 'mvn install -DskipTests'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test -Dmaven.test.failure.ignore=true'
-            }
-        }
-        stage('PMD') {
-            steps {
-                sh 'mvn pmd:pmd'
-            }
-        }
-        stage('JaCoCo') {
-            steps {
-                sh 'mvn jacoco:report'
-            }
-        }
-        stage('Javadoc') {
-            steps {
-                sh 'mvn javadoc:javadoc'
-            }
-        }
-        stage('Site') {
-            steps {
-                sh 'mvn site'
-                sh 'mvn site:stage'
-            }
-        }
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
+                sh 'kubectl rollout status deployment/${DEPLOYMENT_NAME}'
+                sh 'kubectl get pods'
             }
         }
     }
-
-    post {
-        always {
-            archiveArtifacts artifacts: '**/target/site/**/*.*', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.jar', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.war', fingerprint: true
-            junit '**/target/surefire-reports/*.xml'
-        }
-    }
-
  }
