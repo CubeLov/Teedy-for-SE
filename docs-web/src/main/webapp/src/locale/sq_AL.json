@@ -298,6 +298,7 @@
     "user": {
       "title": "Menaxhimi i përdoruesve",
       "add_user": "Shto një përdorues",
+      "add_user_request": "Add a user request",
       "username": "Emri i përdoruesit",
       "create_date": "Krijo datë",
       "totp_enabled": "Për këtë llogari është aktivizuar vërtetimi me dy faktorë",

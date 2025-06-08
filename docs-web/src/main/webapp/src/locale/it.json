@@ -297,6 +297,7 @@
     "user": {
       "title": "Gestione utenti",
       "add_user": "Aggiungi utente",
+      "add_user_request": "Add a user request",
       "username": "Nome utente",
       "create_date": "Data di creazione",
       "totp_enabled": "Autenticazione a due fattori abilitata per questo profilo",

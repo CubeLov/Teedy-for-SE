@@ -282,6 +282,7 @@
     "user": {
       "title": "Administración de usuarios",
       "add_user": "Añadir usuario",
+      "add_user_request": "Add a user request",
       "username": "Usuario",
       "create_date": "Fecha creación",
       "totp_enabled": "Autenticación en dos pasos activada para esta cuenta",

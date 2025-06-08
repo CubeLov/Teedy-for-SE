@@ -298,6 +298,7 @@
     "user": {
       "title": "Benutzerverwaltung",
       "add_user": "Benutzer hinzufügen",
+      "add_user_request": "Add a user request",
       "username": "Benutzername",
       "create_date": "Erstellungsdatum",
       "totp_enabled": "Zwei-Faktor-Authentifizierung für dieses Konto aktiviert",

@@ -88,7 +88,7 @@ public abstract class BaseResource {
      */
     void checkBaseFunction(BaseFunction baseFunction) {
         if (!hasBaseFunction(baseFunction)) {
-            throw new ForbiddenClientException();
+                throw new ForbiddenClientException();
         }
     }
     

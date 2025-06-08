@@ -9,6 +9,10 @@
   </li>
 </ul>
 
+<h1 ng-if="userInfo.username == 'guest'">
+  <a class="btn btn-primary" href="#/settings/user/add">{{ 'settings.user.add_user_request' | translate }}</a>
+</h1>
+
 <h4>{{ 'user.profile.quota_used' | translate }}</h4>
 <div class="row">
   <div class="col-md-6">
